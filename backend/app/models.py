@@ -20,23 +20,25 @@ class Product(Base):
 
 
 class ExpenseSettings(Base):
-    """Singleton row holding all dynamic transit-leg costs (USD per ton).
-    usd_cny_rate_fallback is only used when the live daily FX rate
-    cannot be fetched (e.g. no internet access)."""
+    """Singleton row holding transit-leg costs as a FIXED total per shipment
+    (e.g. one truck/container), not per ton or per kg — freight is quoted
+    this way in practice, so it's divided by the actual shipment weight_kg
+    at calculation time. cn_docs_cny is the only leg quoted in CNY; every
+    other leg is USD. usd_cny_rate_fallback is only used when the live
+    daily FX rate cannot be fetched (e.g. no internet access)."""
 
     __tablename__ = "expense_settings"
 
     id = Column(Integer, primary_key=True, default=1)
 
-    # Transit legs, USD per ton
-    cn_docs = Column(Float, default=0.0)
-    cn_osh_freight = Column(Float, default=0.0)
-    kg_transit = Column(Float, default=0.0)
-    osh_tashkent_freight = Column(Float, default=0.0)
-    uzb_transit = Column(Float, default=0.0)
-    tashkent_antep_freight = Column(Float, default=0.0)
-    tashkent_romania_freight = Column(Float, default=0.0)
-    tashkent_baku_freight = Column(Float, default=0.0)
+    cn_docs_cny = Column(Float, default=0.0)
+    cn_osh_freight_usd = Column(Float, default=0.0)
+    kg_transit_usd = Column(Float, default=0.0)
+    osh_tashkent_freight_usd = Column(Float, default=0.0)
+    uzb_transit_usd = Column(Float, default=0.0)
+    tashkent_antep_freight_usd = Column(Float, default=0.0)
+    tashkent_romania_freight_usd = Column(Float, default=0.0)
+    tashkent_baku_freight_usd = Column(Float, default=0.0)
 
     usd_cny_rate_fallback = Column(Float, default=7.24)
 

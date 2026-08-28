@@ -4,12 +4,13 @@ Route modeled:
   China (purchase price, CNY/kg) -> Osh, Kyrgyzstan (CPT/DAP)
                                   -> Tashkent, Uzbekistan (DAP)
                                      -> Gaziantep / Mersin, Turkey (DAP)
-                                     -> Baku, Azerbaijan (DAP)
+                                     -> Azerbaijan (Baku) (DAP)
                                      -> Romania (DAP)
 
-Transit-leg costs are configured in USD/ton (the trade-standard unit) and
-converted to USD/kg internally so the whole cascade — and the UI — works
-in a single unit: kilograms.
+Each transit leg is a FIXED total cost per shipment (e.g. one truck load),
+not a per-ton rate — that's how freight is actually quoted for this route.
+So every leg cost is divided by the shipment's real weight_kg here, which
+correctly makes heavier shipments cheaper per kg on fixed freight legs.
 """
 
 from __future__ import annotations
@@ -17,8 +18,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..models import ExpenseSettings
-
-KG_PER_TON = 1000.0
 
 
 @dataclass
@@ -31,18 +30,22 @@ def calculate_landed_prices(
     expenses: ExpenseSettings,
     price_cny_per_kg: float,
     usd_cny_rate: float,
+    weight_kg: float,
     margin_usd_per_kg: float = 0.0,
 ) -> tuple[float, list[Leg]]:
     base_usd_per_kg = (price_cny_per_kg / usd_cny_rate) + margin_usd_per_kg
 
-    cn_docs = expenses.cn_docs / KG_PER_TON
-    cn_osh_freight = expenses.cn_osh_freight / KG_PER_TON
-    kg_transit = expenses.kg_transit / KG_PER_TON
-    osh_tashkent_freight = expenses.osh_tashkent_freight / KG_PER_TON
-    uzb_transit = expenses.uzb_transit / KG_PER_TON
-    tashkent_antep_freight = expenses.tashkent_antep_freight / KG_PER_TON
-    tashkent_romania_freight = expenses.tashkent_romania_freight / KG_PER_TON
-    tashkent_baku_freight = expenses.tashkent_baku_freight / KG_PER_TON
+    def per_kg(total_usd: float) -> float:
+        return total_usd / weight_kg
+
+    cn_docs = per_kg(expenses.cn_docs_cny / usd_cny_rate)
+    cn_osh_freight = per_kg(expenses.cn_osh_freight_usd)
+    kg_transit = per_kg(expenses.kg_transit_usd)
+    osh_tashkent_freight = per_kg(expenses.osh_tashkent_freight_usd)
+    uzb_transit = per_kg(expenses.uzb_transit_usd)
+    tashkent_antep_freight = per_kg(expenses.tashkent_antep_freight_usd)
+    tashkent_romania_freight = per_kg(expenses.tashkent_romania_freight_usd)
+    tashkent_baku_freight = per_kg(expenses.tashkent_baku_freight_usd)
 
     osh_price = base_usd_per_kg + cn_docs + cn_osh_freight + kg_transit
     tashkent_price = osh_price + osh_tashkent_freight + uzb_transit
@@ -54,7 +57,7 @@ def calculate_landed_prices(
         Leg("Osh (CPT/DAP)", round(osh_price, 4)),
         Leg("Tashkent (DAP)", round(tashkent_price, 4)),
         Leg("Gaziantep / Mersin (DAP)", round(antep_price, 4)),
-        Leg("Baku (DAP)", round(baku_price, 4)),
+        Leg("Azerbaijan - Baku (DAP)", round(baku_price, 4)),
         Leg("Romania (DAP)", round(romania_price, 4)),
     ]
     return round(base_usd_per_kg, 4), legs

@@ -23,14 +23,14 @@ class ProductOut(ProductBase):
 # ---------- Expenses ----------
 
 class ExpensesBase(BaseModel):
-    cn_docs: float = 0.0
-    cn_osh_freight: float = 0.0
-    kg_transit: float = 0.0
-    osh_tashkent_freight: float = 0.0
-    uzb_transit: float = 0.0
-    tashkent_antep_freight: float = 0.0
-    tashkent_romania_freight: float = 0.0
-    tashkent_baku_freight: float = 0.0
+    cn_docs_cny: float = 0.0
+    cn_osh_freight_usd: float = 0.0
+    kg_transit_usd: float = 0.0
+    osh_tashkent_freight_usd: float = 0.0
+    uzb_transit_usd: float = 0.0
+    tashkent_antep_freight_usd: float = 0.0
+    tashkent_romania_freight_usd: float = 0.0
+    tashkent_baku_freight_usd: float = 0.0
     usd_cny_rate_fallback: float = 7.24
 
 

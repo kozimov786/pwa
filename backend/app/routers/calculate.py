@@ -19,7 +19,7 @@ async def build_calculation(db: Session, payload: schemas.CalculateRequest) -> s
     fx = await get_usd_cny_rate(fallback=settings.usd_cny_rate_fallback)
 
     base_price, legs = calculate_landed_prices(
-        settings, payload.price_cny_per_kg, fx.rate, payload.margin_usd_per_kg
+        settings, payload.price_cny_per_kg, fx.rate, payload.weight_kg, payload.margin_usd_per_kg
     )
     destinations = legs_to_response(legs, payload.weight_kg)
 

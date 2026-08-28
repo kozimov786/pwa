@@ -23,14 +23,14 @@ def seed_data():
             db.add(
                 models.ExpenseSettings(
                     id=1,
-                    cn_docs=15.0,
-                    cn_osh_freight=95.0,
-                    kg_transit=20.0,
-                    osh_tashkent_freight=35.0,
-                    uzb_transit=10.0,
-                    tashkent_antep_freight=210.0,
-                    tashkent_romania_freight=260.0,
-                    tashkent_baku_freight=150.0,
+                    cn_docs_cny=3500.0,
+                    cn_osh_freight_usd=2500.0,
+                    kg_transit_usd=1100.0,
+                    osh_tashkent_freight_usd=1800.0,
+                    uzb_transit_usd=400.0,
+                    tashkent_antep_freight_usd=3000.0,
+                    tashkent_romania_freight_usd=5500.0,
+                    tashkent_baku_freight_usd=3000.0,
                     usd_cny_rate_fallback=7.24,
                 )
             )

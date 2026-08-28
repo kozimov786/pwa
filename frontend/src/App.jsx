@@ -4,6 +4,7 @@ import { ProductSelect, WeightPresets } from "./components/PresetButtons";
 import VoiceInput from "./components/VoiceInput";
 import PricingTable from "./components/PricingTable";
 import ActionBar from "./components/ActionBar";
+import SettingsModal from "./components/SettingsModal";
 
 export default function App() {
   const [products, setProducts] = useState([]);
@@ -14,6 +15,8 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsVersion, setSettingsVersion] = useState(0);
 
   function loadProducts() {
     return getProducts()
@@ -57,7 +60,7 @@ export default function App() {
       .then(setResult)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [calcPayload]);
+  }, [calcPayload, settingsVersion]);
 
   function handleVoiceParsed(parsed) {
     if (parsed.product_id) setProductId(parsed.product_id);
@@ -74,7 +77,17 @@ export default function App() {
             <p className="text-sm text-slate-400">Xalqaro ulgurji savdo narx kalkulyatori</p>
           </div>
         </div>
-        <VoiceInput onParsed={handleVoiceParsed} />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="w-12 h-12 rounded-full flex items-center justify-center border border-white/10
+                       bg-base-700/60 hover:border-neon-cyan/60 hover:text-neon-cyan transition-all"
+            title="Rasxodlar sozlamalari"
+          >
+            ⚙️
+          </button>
+          <VoiceInput onParsed={handleVoiceParsed} />
+        </div>
       </header>
 
       <section className="glass-card p-4 space-y-4">
@@ -127,6 +140,14 @@ export default function App() {
       <PricingTable result={result} />
 
       <ActionBar calcPayload={calcPayload} canAct={!!result && !loading} />
+
+      <SettingsModal
+        open={settingsOpen}
+        onClose={() => {
+          setSettingsOpen(false);
+          setSettingsVersion((v) => v + 1);
+        }}
+      />
     </div>
   );
 }
