@@ -1,0 +1,71 @@
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from . import models
+from .database import Base, SessionLocal, engine
+from .routers import bank_transfer, calculate, dispatch, expenses, export, products, voice
+
+SEED_PRODUCTS = [
+    {"name": "Kabuklu 33", "price_cny_per_ton": 6800.0, "oil_content": "33%", "packaging": "50kg jute bags"},
+    {"name": "Xinpu 60%", "price_cny_per_ton": 8200.0, "oil_content": "60%", "packaging": "50kg jute bags"},
+]
+
+
+def seed_data():
+    db = SessionLocal()
+    try:
+        if db.query(models.Product).count() == 0:
+            for item in SEED_PRODUCTS:
+                db.add(models.Product(**item))
+        if db.get(models.ExpenseSettings, 1) is None:
+            db.add(
+                models.ExpenseSettings(
+                    id=1,
+                    cn_docs=15.0,
+                    cn_osh_freight=95.0,
+                    kg_transit=20.0,
+                    osh_tashkent_freight=35.0,
+                    uzb_transit=10.0,
+                    tashkent_antep_freight=210.0,
+                    tashkent_romania_freight=260.0,
+                    tashkent_baku_freight=150.0,
+                    usd_cny_rate=7.24,
+                    usd_eur_rate=0.92,
+                )
+            )
+        db.commit()
+    finally:
+        db.close()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    seed_data()
+    yield
+
+
+app = FastAPI(title="Wholesale Trade Calc API", version="1.0.0", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(products.router)
+app.include_router(expenses.router)
+app.include_router(calculate.router)
+app.include_router(export.router)
+app.include_router(bank_transfer.router)
+app.include_router(dispatch.router)
+app.include_router(voice.router)
+
+
+@app.get("/api/health")
+def health():
+    return {"status": "ok"}

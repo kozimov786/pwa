@@ -1,0 +1,101 @@
+const BASE = "/api";
+
+async function handle(res) {
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const body = await res.json();
+      detail = body.detail || JSON.stringify(body);
+    } catch {
+      /* ignore */
+    }
+    throw new Error(detail);
+  }
+  return res;
+}
+
+export async function getProducts() {
+  const res = await handle(await fetch(`${BASE}/products`));
+  return res.json();
+}
+
+export async function getExpenses() {
+  const res = await handle(await fetch(`${BASE}/expenses`));
+  return res.json();
+}
+
+export async function updateExpenses(payload) {
+  const res = await handle(
+    await fetch(`${BASE}/expenses`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+  );
+  return res.json();
+}
+
+export async function calculate(payload) {
+  const res = await handle(
+    await fetch(`${BASE}/calculate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+  );
+  return res.json();
+}
+
+async function downloadBlob(path, payload, filename) {
+  const res = await handle(
+    await fetch(`${BASE}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+  );
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+export function exportPdf(payload, filename = "quotation.pdf") {
+  return downloadBlob("/export/pdf", payload, filename);
+}
+
+export function exportExcel(payload, filename = "quotation.xlsx") {
+  return downloadBlob("/export/excel", payload, filename);
+}
+
+export async function dispatchGroup(payload) {
+  const res = await handle(
+    await fetch(`${BASE}/dispatch-group`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+  );
+  return res.json();
+}
+
+export function bankTransferTalimati(payload, filename = "bank_transfer_talimati.pdf") {
+  return downloadBlob("/bank-transfer-talimati", payload, filename);
+}
+
+export async function parseVoice(audioBlob) {
+  const form = new FormData();
+  form.append("audio", audioBlob, "voice.webm");
+  const res = await handle(
+    await fetch(`${BASE}/voice/parse`, {
+      method: "POST",
+      body: form,
+    })
+  );
+  return res.json();
+}
