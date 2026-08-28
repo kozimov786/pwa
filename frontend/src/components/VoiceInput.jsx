@@ -1,7 +1,9 @@
 import { useRef, useState } from "react";
 import { parseVoice } from "../api/client";
+import { useLanguage } from "../LanguageContext";
 
 export default function VoiceInput({ onParsed }) {
+  const { t } = useLanguage();
   const [recording, setRecording] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -32,7 +34,7 @@ export default function VoiceInput({ onParsed }) {
       mediaRecorderRef.current = recorder;
       setRecording(true);
     } catch {
-      setError("Mikrofonga ruxsat berilmadi");
+      setError(t("micDenied"));
     }
   }
 
@@ -48,11 +50,11 @@ export default function VoiceInput({ onParsed }) {
         disabled={busy}
         className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all
           ${recording ? "bg-neon-pink/20 border-neon-pink text-neon-pink animate-pulse" : "bg-base-700/60 border-white/10 hover:border-neon-cyan/60 hover:text-neon-cyan"}`}
-        title="Ovozli buyruq"
+        title={t("voiceTitle")}
       >
         {busy ? "…" : "🎙️"}
       </button>
-      {recording && <span className="text-sm text-neon-pink">Yozilmoqda…</span>}
+      {recording && <span className="text-sm text-neon-pink">{t("voiceRecording")}</span>}
       {error && <span className="text-sm text-red-400">{error}</span>}
     </div>
   );

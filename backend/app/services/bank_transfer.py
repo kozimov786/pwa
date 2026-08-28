@@ -8,6 +8,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
+from .fonts import font_for_lang
 from .pdf_generator import _letterhead
 
 CURRENCY_WORDS_TR = {
@@ -40,13 +41,15 @@ def generate_bank_transfer_pdf(
     reference: str,
     ordering_customer: str,
 ) -> bytes:
+    font = font_for_lang("tr")  # this document is always in Turkish, for the recipient bank
+
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
         buf, pagesize=A4, topMargin=20 * mm, bottomMargin=20 * mm, leftMargin=18 * mm, rightMargin=18 * mm
     )
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle("Title", parent=styles["Title"], fontSize=18, spaceAfter=6)
-    normal = styles["Normal"]
+    name_style = ParagraphStyle("GokleName", parent=styles["Title"], fontName=font, fontSize=18, spaceAfter=6)
+    normal = ParagraphStyle("Normal", parent=styles["Normal"], fontName=font)
 
     amount_words = amount_to_turkish_words(amount, currency)
 
@@ -68,7 +71,7 @@ def generate_bank_transfer_pdf(
             [
                 ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#0f172a")),
                 ("TEXTCOLOR", (0, 0), (0, -1), colors.white),
-                ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+                ("FONTNAME", (0, 0), (-1, -1), font),
                 ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
                 ("TOPPADDING", (0, 0), (-1, -1), 7),
@@ -79,7 +82,7 @@ def generate_bank_transfer_pdf(
     )
 
     elements = [
-        _letterhead(title_style),
+        _letterhead(name_style),
         Spacer(1, 4 * mm),
         Paragraph("Havale / EFT Talimatı", ParagraphStyle("Sub2", parent=normal, fontSize=14)),
         Paragraph("Turkish Bank Transfer Instruction", normal),

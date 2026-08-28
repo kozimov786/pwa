@@ -1,8 +1,12 @@
+import { useLanguage } from "../LanguageContext";
+
 export default function PricingTable({ result }) {
+  const { t } = useLanguage();
+
   if (!result) {
     return (
       <div className="glass-card p-8 text-center text-slate-400">
-        Mahsulot, og'irlik va Xitoy narxini kiriting — natija shu yerda ko'rinadi
+        {t("emptyTable")}
       </div>
     );
   }
@@ -13,23 +17,23 @@ export default function PricingTable({ result }) {
         <div>
           <div className="text-lg font-semibold text-neon-cyan">{result.product.name}</div>
           <div className="text-xs text-slate-400">
-            Xitoy olish narxi: ¥{result.price_cny_per_kg}/kg &middot; kurs: 1 USD = {result.usd_cny_rate} CNY
-            {result.fx_is_live ? " (bugungi kurs)" : " (zaxira kurs)"}
+            {t("chinaPriceInfo")}: ¥{result.price_cny_per_kg}/kg &middot; {t("rateInfo")}: 1 USD = {result.usd_cny_rate} CNY
+            {result.fx_is_live ? ` (${t("liveRate")})` : ` (${t("fallbackRate")})`}
           </div>
         </div>
         <div className="text-sm text-slate-300">
-          Baza narx: <span className="text-neon-violet font-semibold">${result.base_price_usd_per_kg}/kg</span>
+          {t("basePrice")}: <span className="text-neon-violet font-semibold">${result.base_price_usd_per_kg}/kg</span>
         </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-slate-400 bg-white/5">
-              <th className="px-4 py-3 font-medium">Mahsulot</th>
-              <th className="px-4 py-3 font-medium">Yo'nalish</th>
-              <th className="px-4 py-3 font-medium text-right">Jami kg</th>
-              <th className="px-4 py-3 font-medium text-right">1 kg narx (USD)</th>
-              <th className="px-4 py-3 font-medium text-right">Jami maliyet (USD)</th>
+              <th className="px-4 py-3 font-medium">{t("colProduct")}</th>
+              <th className="px-4 py-3 font-medium">{t("colDestination")}</th>
+              <th className="px-4 py-3 font-medium text-right">{t("colTotalKg")}</th>
+              <th className="px-4 py-3 font-medium text-right">{t("colPricePerKg")}</th>
+              <th className="px-4 py-3 font-medium text-right">{t("colTotalCost")}</th>
             </tr>
           </thead>
           <tbody>

@@ -46,6 +46,37 @@ export async function updateExpenses(payload) {
   return res.json();
 }
 
+export async function getDestinations() {
+  const res = await handle(await fetch(`${BASE}/destinations`));
+  return res.json();
+}
+
+export async function createDestination(payload) {
+  const res = await handle(
+    await fetch(`${BASE}/destinations`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+  );
+  return res.json();
+}
+
+export async function updateDestination(id, payload) {
+  const res = await handle(
+    await fetch(`${BASE}/destinations/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+  );
+  return res.json();
+}
+
+export async function deleteDestination(id) {
+  await handle(await fetch(`${BASE}/destinations/${id}`, { method: "DELETE" }));
+}
+
 export async function calculate(payload) {
   const res = await handle(
     await fetch(`${BASE}/calculate`, {

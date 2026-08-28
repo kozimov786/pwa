@@ -17,9 +17,15 @@ async def build_calculation(db: Session, payload: schemas.CalculateRequest) -> s
 
     settings = _get_or_create_settings(db)
     fx = await get_usd_cny_rate(fallback=settings.usd_cny_rate_fallback)
+    destinations_cfg = (
+        db.query(models.Destination)
+        .filter(models.Destination.is_active == True)  # noqa: E712
+        .order_by(models.Destination.sort_order, models.Destination.id)
+        .all()
+    )
 
     base_price, legs = calculate_landed_prices(
-        settings, payload.price_cny_per_kg, fx.rate, payload.weight_kg, payload.margin_usd_per_kg
+        settings, destinations_cfg, payload.price_cny_per_kg, fx.rate, payload.weight_kg, payload.margin_usd_per_kg
     )
     destinations = legs_to_response(legs, payload.weight_kg)
 

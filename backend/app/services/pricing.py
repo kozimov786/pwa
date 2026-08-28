@@ -3,13 +3,14 @@
 Route modeled:
   China (purchase price, CNY/kg) -> Osh, Kyrgyzstan (CPT/DAP)
                                   -> Tashkent, Uzbekistan (DAP)
-                                     -> Gaziantep / Mersin, Turkey (DAP)
-                                     -> Azerbaijan (Baku) (DAP)
-                                     -> Romania (DAP)
+                                     -> any number of final destinations,
+                                        each user-managed in Settings
+                                        (Gaziantep/Mersin, Azerbaijan-Baku,
+                                        Romania, Syria, ...)
 
-Each transit leg is a FIXED total cost per shipment (e.g. one truck load),
-not a per-ton rate — that's how freight is actually quoted for this route.
-So every leg cost is divided by the shipment's real weight_kg here, which
+Every leg is a FIXED total cost per shipment (e.g. one truck load), not a
+per-ton rate — that's how freight is actually quoted for this route. So
+every leg cost is divided by the shipment's real weight_kg here, which
 correctly makes heavier shipments cheaper per kg on fixed freight legs.
 """
 
@@ -17,7 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..models import ExpenseSettings
+from ..models import Destination, ExpenseSettings
 
 
 @dataclass
@@ -28,6 +29,7 @@ class Leg:
 
 def calculate_landed_prices(
     expenses: ExpenseSettings,
+    destinations: list[Destination],
     price_cny_per_kg: float,
     usd_cny_rate: float,
     weight_kg: float,
@@ -43,23 +45,20 @@ def calculate_landed_prices(
     kg_transit = per_kg(expenses.kg_transit_usd)
     osh_tashkent_freight = per_kg(expenses.osh_tashkent_freight_usd)
     uzb_transit = per_kg(expenses.uzb_transit_usd)
-    tashkent_antep_freight = per_kg(expenses.tashkent_antep_freight_usd)
-    tashkent_romania_freight = per_kg(expenses.tashkent_romania_freight_usd)
-    tashkent_baku_freight = per_kg(expenses.tashkent_baku_freight_usd)
 
     osh_price = base_usd_per_kg + cn_docs + cn_osh_freight + kg_transit
     tashkent_price = osh_price + osh_tashkent_freight + uzb_transit
-    antep_price = tashkent_price + tashkent_antep_freight
-    baku_price = tashkent_price + tashkent_baku_freight
-    romania_price = tashkent_price + tashkent_romania_freight
 
     legs = [
         Leg("Osh (CPT/DAP)", round(osh_price, 4)),
         Leg("Tashkent (DAP)", round(tashkent_price, 4)),
-        Leg("Gaziantep / Mersin (DAP)", round(antep_price, 4)),
-        Leg("Azerbaijan - Baku (DAP)", round(baku_price, 4)),
-        Leg("Romania (DAP)", round(romania_price, 4)),
     ]
+    for dest in destinations:
+        if not dest.is_active:
+            continue
+        price = tashkent_price + per_kg(dest.freight_usd_total)
+        legs.append(Leg(f"{dest.name} ({dest.incoterm})", round(price, 4)))
+
     return round(base_usd_per_kg, 4), legs
 
 

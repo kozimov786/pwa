@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useLanguage } from "../LanguageContext";
 
 export function ProductSelect({ products, selectedId, onSelect, onAddProduct }) {
+  const { t } = useLanguage();
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -24,7 +26,7 @@ export function ProductSelect({ products, selectedId, onSelect, onAddProduct }) 
         className="bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm min-w-[180px]
                    focus:outline-none focus:border-neon-cyan/60"
       >
-        {products.length === 0 && <option value="">Mahsulot yo'q</option>}
+        {products.length === 0 && <option value="">{t("noProducts")}</option>}
         {products.map((p) => (
           <option key={p.id} value={p.id}>
             {p.name}
@@ -37,12 +39,12 @@ export function ProductSelect({ products, selectedId, onSelect, onAddProduct }) 
         value={newName}
         onChange={(e) => setNewName(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && submitNew()}
-        placeholder="Yangi mahsulot nomi"
+        placeholder={t("newProductPlaceholder")}
         className="bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm w-44
                    focus:outline-none focus:border-neon-cyan/60"
       />
       <button onClick={submitNew} disabled={busy || !newName.trim()} className="neon-btn">
-        {busy ? "…" : "+ Qo'shish"}
+        {busy ? "…" : t("addButton")}
       </button>
     </div>
   );
@@ -51,6 +53,7 @@ export function ProductSelect({ products, selectedId, onSelect, onAddProduct }) 
 const WEIGHT_PRESETS_KG = [20000, 21000, 22000, 20800];
 
 export function WeightPresets({ weightKg, onChange }) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-wrap items-center gap-2">
       {WEIGHT_PRESETS_KG.map((kg) => (
@@ -70,7 +73,7 @@ export function WeightPresets({ weightKg, onChange }) {
         onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
         className="w-28 bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm
                    focus:outline-none focus:border-neon-cyan/60"
-        placeholder="Custom kg"
+        placeholder={t("customWeightPlaceholder")}
       />
     </div>
   );

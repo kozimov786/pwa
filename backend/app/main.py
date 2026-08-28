@@ -5,11 +5,18 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import models
 from .database import Base, SessionLocal, engine
-from .routers import bank_transfer, calculate, dispatch, expenses, export, products, voice
+from .routers import bank_transfer, calculate, destinations, dispatch, expenses, export, products, voice
 
 SEED_PRODUCTS = [
     {"name": "Kabuklu 33", "oil_content": "33%", "packaging": "50kg jute bags"},
     {"name": "Xinpu 60%", "oil_content": "60%", "packaging": "50kg jute bags"},
+]
+
+SEED_DESTINATIONS = [
+    {"name": "Gaziantep / Mersin", "incoterm": "DAP", "freight_usd_total": 3000.0, "sort_order": 1},
+    {"name": "Azerbaijan - Baku", "incoterm": "DAP", "freight_usd_total": 3000.0, "sort_order": 2},
+    {"name": "Romania", "incoterm": "DAP", "freight_usd_total": 5500.0, "sort_order": 3},
+    {"name": "Syria", "incoterm": "DAP", "freight_usd_total": 3700.0, "sort_order": 4},
 ]
 
 
@@ -28,12 +35,12 @@ def seed_data():
                     kg_transit_usd=1100.0,
                     osh_tashkent_freight_usd=1800.0,
                     uzb_transit_usd=400.0,
-                    tashkent_antep_freight_usd=3000.0,
-                    tashkent_romania_freight_usd=5500.0,
-                    tashkent_baku_freight_usd=3000.0,
                     usd_cny_rate_fallback=7.24,
                 )
             )
+        if db.query(models.Destination).count() == 0:
+            for item in SEED_DESTINATIONS:
+                db.add(models.Destination(**item))
         db.commit()
     finally:
         db.close()
@@ -58,6 +65,7 @@ app.add_middleware(
 
 app.include_router(products.router)
 app.include_router(expenses.router)
+app.include_router(destinations.router)
 app.include_router(calculate.router)
 app.include_router(export.router)
 app.include_router(bank_transfer.router)

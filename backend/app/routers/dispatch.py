@@ -21,11 +21,12 @@ async def _run_dispatch(payload: schemas.DispatchRequest):
             db.close()
         legs = [d.model_dump() for d in calc.destinations]
         safe_name = calc.product.name.replace(" ", "_")
+        lang = payload.calculate_payload.lang
         if payload.include_pdf:
-            pdf_bytes = generate_quotation_pdf(calc.product.name, calc.weight_kg, calc.base_price_usd_per_kg, legs)
+            pdf_bytes = generate_quotation_pdf(calc.product.name, calc.weight_kg, legs, lang=lang)
             attachments.append((pdf_bytes, f"quotation_{safe_name}.pdf"))
         if payload.include_excel:
-            xlsx_bytes = generate_quotation_excel(calc.product.name, calc.weight_kg, calc.base_price_usd_per_kg, legs)
+            xlsx_bytes = generate_quotation_excel(calc.product.name, calc.weight_kg, legs, lang=lang)
             attachments.append((xlsx_bytes, f"quotation_{safe_name}.xlsx"))
 
     await dispatch_to_group(payload.message, attachments)

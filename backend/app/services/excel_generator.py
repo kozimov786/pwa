@@ -5,6 +5,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
+from .i18n import t
+
 HEADER_FILL = PatternFill(start_color="0F172A", end_color="0F172A", fill_type="solid")
 ALT_FILL = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
 HEADER_FONT = Font(color="FFFFFF", bold=True, size=11)
@@ -12,28 +14,32 @@ THIN = Side(style="thin", color="CBD5E1")
 BORDER = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
 
 
-def generate_quotation_excel(product_name: str, weight_kg: float, base_price_usd_per_kg: float, legs: list[dict]) -> bytes:
+def generate_quotation_excel(product_name: str, weight_kg: float, legs: list[dict], lang: str = "en") -> bytes:
     wb = Workbook()
     ws = wb.active
     ws.title = "Quotation"
 
     ws.merge_cells("A1:E1")
-    ws["A1"] = "GOKLE — Wholesale Trade Quotation"
+    ws["A1"] = "GOKLE"
     ws["A1"].font = Font(bold=True, size=16)
 
-    ws["A2"] = "Product"
+    ws["A2"] = t(lang, "product")
     ws["B2"] = product_name
-    ws["A3"] = "Date"
+    ws["A3"] = t(lang, "date")
     ws["B3"] = date.today().isoformat()
-    ws["A4"] = "Weight (kg)"
+    ws["A4"] = t(lang, "weight")
     ws["B4"] = weight_kg
-    ws["A5"] = "Base purchase price (USD/kg)"
-    ws["B5"] = base_price_usd_per_kg
-    for r in range(2, 6):
+    for r in range(2, 5):
         ws[f"A{r}"].font = Font(bold=True)
 
-    header_row = 7
-    headers = ["Mahsulot", "Yo'nalish", "Jami kg", "1 kg narx (USD)", "Jami maliyet (USD)"]
+    header_row = 6
+    headers = [
+        t(lang, "col_product"),
+        t(lang, "col_destination"),
+        t(lang, "col_total_kg"),
+        t(lang, "col_price_per_kg"),
+        t(lang, "col_total_cost"),
+    ]
     for col, h in enumerate(headers, start=1):
         cell = ws.cell(row=header_row, column=col, value=h)
         cell.fill = HEADER_FILL

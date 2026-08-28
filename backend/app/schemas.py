@@ -28,9 +28,6 @@ class ExpensesBase(BaseModel):
     kg_transit_usd: float = 0.0
     osh_tashkent_freight_usd: float = 0.0
     uzb_transit_usd: float = 0.0
-    tashkent_antep_freight_usd: float = 0.0
-    tashkent_romania_freight_usd: float = 0.0
-    tashkent_baku_freight_usd: float = 0.0
     usd_cny_rate_fallback: float = 7.24
 
 
@@ -42,6 +39,29 @@ class ExpensesOut(ExpensesBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+# ---------- Destinations (dynamic final legs from Tashkent) ----------
+
+class DestinationBase(BaseModel):
+    name: str
+    incoterm: str = "DAP"
+    freight_usd_total: float = 0.0
+    sort_order: int = 0
+    is_active: bool = True
+
+
+class DestinationCreate(DestinationBase):
+    pass
+
+
+class DestinationUpdate(DestinationBase):
+    pass
+
+
+class DestinationOut(DestinationBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+
+
 # ---------- Calculate ----------
 
 class CalculateRequest(BaseModel):
@@ -49,6 +69,7 @@ class CalculateRequest(BaseModel):
     weight_kg: float = 21000.0
     price_cny_per_kg: float
     margin_usd_per_kg: float = 0.0
+    lang: str = "en"
 
 
 class DestinationPrice(BaseModel):

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { dispatchGroup, exportExcel, exportPdf } from "../api/client";
+import { useLanguage } from "../LanguageContext";
 import BankTransferModal from "./BankTransferModal";
 
 export default function ActionBar({ calcPayload, canAct }) {
+  const { t } = useLanguage();
   const [busy, setBusy] = useState(null);
   const [notice, setNotice] = useState(null);
   const [bankModalOpen, setBankModalOpen] = useState(false);
@@ -12,9 +14,9 @@ export default function ActionBar({ calcPayload, canAct }) {
     setNotice(null);
     try {
       await fn();
-      if (key === "whatsapp") setNotice("Guruhga yuborish navbatga qo'yildi ✅");
+      if (key === "whatsapp") setNotice(t("dispatchedNotice"));
     } catch (err) {
-      setNotice(`Xato: ${err.message}`);
+      setNotice(`${t("errorPrefix")}: ${err.message}`);
     } finally {
       setBusy(null);
     }
@@ -28,14 +30,14 @@ export default function ActionBar({ calcPayload, canAct }) {
           onClick={() => run("pdf", () => exportPdf(calcPayload))}
           className="action-btn"
         >
-          📥 {busy === "pdf" ? "…" : "PDF"}
+          📥 {busy === "pdf" ? "…" : t("pdf")}
         </button>
         <button
           disabled={!canAct || busy}
           onClick={() => run("excel", () => exportExcel(calcPayload))}
           className="action-btn"
         >
-          📊 {busy === "excel" ? "…" : "Excel"}
+          📊 {busy === "excel" ? "…" : t("excel")}
         </button>
         <button
           disabled={!canAct || busy}
@@ -51,10 +53,10 @@ export default function ActionBar({ calcPayload, canAct }) {
           }
           className="action-btn"
         >
-          📤 {busy === "whatsapp" ? "…" : "WhatsApp"}
+          📤 {busy === "whatsapp" ? "…" : t("whatsapp")}
         </button>
         <button onClick={() => setBankModalOpen(true)} className="action-btn">
-          🏦 Talimat
+          🏦 {t("bankTransfer")}
         </button>
       </div>
       {notice && <div className="text-sm text-slate-300">{notice}</div>}
