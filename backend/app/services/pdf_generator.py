@@ -70,7 +70,6 @@ def generate_quotation_pdf(product_name: str, weight_kg: float, legs: list[dict]
         "TableHeader", parent=styles["Normal"], fontName=font, fontSize=9.5, textColor=colors.white, leading=11
     )
     header = [
-        Paragraph(t(lang, "col_product"), header_style),
         Paragraph(t(lang, "col_destination"), header_style),
         Paragraph(t(lang, "col_total_kg"), header_style),
         Paragraph(t(lang, "col_price_per_kg"), header_style),
@@ -80,21 +79,20 @@ def generate_quotation_pdf(product_name: str, weight_kg: float, legs: list[dict]
     for leg in legs:
         data.append(
             [
-                product_name,
                 leg["destination"],
                 f"{weight_kg:,.0f}",
-                f"{leg['price_per_kg_usd']:.4f}",
+                f"{leg['price_per_kg_usd']:.2f}$",
                 f"{leg['total_usd']:,.2f}",
             ]
         )
 
-    table = Table(data, colWidths=[28 * mm, 38 * mm, 22 * mm, 36 * mm, 38 * mm])
+    table = Table(data, colWidths=[52 * mm, 26 * mm, 40 * mm, 44 * mm])
     style = [
         ("BACKGROUND", (0, 0), (-1, 0), DARK_BG),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
         ("FONTNAME", (0, 0), (-1, -1), font),
         ("FONTSIZE", (0, 0), (-1, -1), 9.5),
-        ("ALIGN", (2, 0), (-1, -1), "RIGHT"),
+        ("ALIGN", (1, 0), (-1, -1), "RIGHT"),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f1f5f9")]),
         ("TOPPADDING", (0, 0), (-1, -1), 6),

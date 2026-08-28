@@ -29,7 +29,6 @@ export default function PricingTable({ result }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-slate-400 bg-white/5">
-              <th className="px-4 py-3 font-medium">{t("colProduct")}</th>
               <th className="px-4 py-3 font-medium">{t("colDestination")}</th>
               <th className="px-4 py-3 font-medium text-right">{t("colTotalKg")}</th>
               <th className="px-4 py-3 font-medium text-right">{t("colPricePerKg")}</th>
@@ -39,10 +38,9 @@ export default function PricingTable({ result }) {
           <tbody>
             {result.destinations.map((d) => (
               <tr key={d.destination} className="border-t border-white/5 hover:bg-white/5 transition-colors">
-                <td className="px-4 py-3 font-medium">{result.product.name}</td>
                 <td className="px-4 py-3 text-slate-300">{d.destination}</td>
                 <td className="px-4 py-3 text-right">{result.weight_kg.toLocaleString()}</td>
-                <td className="px-4 py-3 text-right text-neon-cyan">{d.price_per_kg_usd.toFixed(4)}</td>
+                <td className="px-4 py-3 text-right text-neon-cyan">{d.price_per_kg_usd.toFixed(2)}$</td>
                 <td className="px-4 py-3 text-right font-semibold">{d.total_usd.toLocaleString()}</td>
               </tr>
             ))}

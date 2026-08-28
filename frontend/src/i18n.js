@@ -8,7 +8,7 @@ export const LANGUAGES = [
 
 export const translations = {
   uz: {
-    appSubtitle: "Xalqaro ulgurji savdo narx kalkulyatori",
+    appSubtitle: "Xalqaro ulgurji savdo narxi",
     settingsTitle: "Rasxodlar sozlamalari",
     settingsHint: "Har bir qiymat — butun yuk (mashina) uchun jami xarajat. Hisoblashda avtomatik kg'ga bo'linadi.",
     loading: "Yuklanmoqda…",
@@ -32,7 +32,6 @@ export const translations = {
     liveRate: "bugungi kurs",
     fallbackRate: "zaxira kurs",
     basePrice: "Baza narx",
-    colProduct: "Mahsulot",
     colDestination: "Yo'nalish",
     colTotalKg: "Jami kg",
     colPricePerKg: "1 kg narx (USD)",
@@ -80,7 +79,7 @@ export const translations = {
     quantityAuto: "Miqdor (avtomatik)",
   },
   ru: {
-    appSubtitle: "Калькулятор цен для международной оптовой торговли",
+    appSubtitle: "Цены для международной оптовой торговли",
     settingsTitle: "Настройки расходов",
     settingsHint: "Каждое значение — общая стоимость на всю партию (грузовик). При расчёте автоматически делится на кг.",
     loading: "Загрузка…",
@@ -104,7 +103,6 @@ export const translations = {
     liveRate: "курс на сегодня",
     fallbackRate: "резервный курс",
     basePrice: "Базовая цена",
-    colProduct: "Товар",
     colDestination: "Направление",
     colTotalKg: "Всего кг",
     colPricePerKg: "Цена/кг (USD)",
@@ -152,7 +150,7 @@ export const translations = {
     quantityAuto: "Количество (авто)",
   },
   en: {
-    appSubtitle: "International wholesale trade price calculator",
+    appSubtitle: "International wholesale trade price",
     settingsTitle: "Expense settings",
     settingsHint: "Each value is the total cost for the whole shipment (one truck). It's automatically divided per kg when calculating.",
     loading: "Loading…",
@@ -176,7 +174,6 @@ export const translations = {
     liveRate: "today's rate",
     fallbackRate: "fallback rate",
     basePrice: "Base price",
-    colProduct: "Product",
     colDestination: "Destination",
     colTotalKg: "Total kg",
     colPricePerKg: "Price/kg (USD)",
@@ -224,7 +221,7 @@ export const translations = {
     quantityAuto: "Quantity (auto)",
   },
   tr: {
-    appSubtitle: "Uluslararası toptan ticaret fiyat hesaplayıcısı",
+    appSubtitle: "Uluslararası toptan ticaret fiyatı",
     settingsTitle: "Masraf ayarları",
     settingsHint: "Her değer, tüm yük (bir kamyon) için toplam maliyettir. Hesaplama sırasında otomatik olarak kg'a bölünür.",
     loading: "Yükleniyor…",
@@ -248,7 +245,6 @@ export const translations = {
     liveRate: "bugünkü kur",
     fallbackRate: "yedek kur",
     basePrice: "Taban fiyat",
-    colProduct: "Ürün",
     colDestination: "Varış Yeri",
     colTotalKg: "Toplam kg",
     colPricePerKg: "Kg Fiyatı (USD)",
@@ -296,7 +292,7 @@ export const translations = {
     quantityAuto: "Miktar (otomatik)",
   },
   zh: {
-    appSubtitle: "国际批发贸易价格计算器",
+    appSubtitle: "国际批发贸易价格",
     settingsTitle: "费用设置",
     settingsHint: "每个数值是整批货物(一辆卡车)的总费用,计算时会自动按公斤分摊。",
     loading: "加载中…",
@@ -320,7 +316,6 @@ export const translations = {
     liveRate: "今日汇率",
     fallbackRate: "备用汇率",
     basePrice: "基础价格",
-    colProduct: "产品",
     colDestination: "目的地",
     colTotalKg: "总公斤数",
     colPricePerKg: "单价/公斤 (美元)",

@@ -19,7 +19,7 @@ def generate_quotation_excel(product_name: str, weight_kg: float, legs: list[dic
     ws = wb.active
     ws.title = "Quotation"
 
-    ws.merge_cells("A1:E1")
+    ws.merge_cells("A1:D1")
     ws["A1"] = "GOKLE"
     ws["A1"].font = Font(bold=True, size=16)
 
@@ -34,7 +34,6 @@ def generate_quotation_excel(product_name: str, weight_kg: float, legs: list[dic
 
     header_row = 6
     headers = [
-        t(lang, "col_product"),
         t(lang, "col_destination"),
         t(lang, "col_total_kg"),
         t(lang, "col_price_per_kg"),
@@ -50,7 +49,6 @@ def generate_quotation_excel(product_name: str, weight_kg: float, legs: list[dic
     for i, leg in enumerate(legs):
         row = header_row + 1 + i
         values = [
-            product_name,
             leg["destination"],
             weight_kg,
             leg["price_per_kg_usd"],
@@ -59,10 +57,12 @@ def generate_quotation_excel(product_name: str, weight_kg: float, legs: list[dic
         for col, v in enumerate(values, start=1):
             cell = ws.cell(row=row, column=col, value=v)
             cell.border = BORDER
+            if col == 3:
+                cell.number_format = '0.00"$"'
             if i % 2 == 1:
                 cell.fill = ALT_FILL
 
-    widths = [24, 30, 16, 18, 20]
+    widths = [30, 16, 18, 20]
     for col, w in enumerate(widths, start=1):
         ws.column_dimensions[get_column_letter(col)].width = w
 
