@@ -97,3 +97,14 @@ class VakifTransferRequest(BaseModel):
     amount: float
     currency: str = "USD"
     contract_no: str = ""
+
+
+# ---------- Proforma Invoice (docx template based) ----------
+
+class InvoiceRequest(BaseModel):
+    company_key: str
+    tarih: str
+    contract_no: str = ""
+    unit_price: float
+    total_price: float
+    currency: str = "USD"

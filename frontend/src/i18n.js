@@ -74,6 +74,10 @@ export const translations = {
     tarih: "Tarih (kun/oy/yil)",
     valorTarihi: "Valör Tarihi",
     contractNo: "Swift Açıklaması / Contract No",
+    invoiceModalTitle: "Proforma Invoice",
+    unitPrice: "Birlik narxi (unit price)",
+    totalPrice: "Jami narx (total price)",
+    quantityAuto: "Miqdor (avtomatik)",
   },
   ru: {
     appSubtitle: "Калькулятор цен для международной оптовой торговли",
@@ -142,6 +146,10 @@ export const translations = {
     tarih: "Дата (день/месяц/год)",
     valorTarihi: "Дата валютирования",
     contractNo: "Swift Açıklaması / Номер контракта",
+    invoiceModalTitle: "Proforma Invoice",
+    unitPrice: "Цена за единицу (unit price)",
+    totalPrice: "Общая цена (total price)",
+    quantityAuto: "Количество (авто)",
   },
   en: {
     appSubtitle: "International wholesale trade price calculator",
@@ -210,6 +218,10 @@ export const translations = {
     tarih: "Tarih (day/month/year)",
     valorTarihi: "Valör Tarihi (value date)",
     contractNo: "Swift Açıklaması / Contract No",
+    invoiceModalTitle: "Proforma Invoice",
+    unitPrice: "Unit price",
+    totalPrice: "Total price",
+    quantityAuto: "Quantity (auto)",
   },
   tr: {
     appSubtitle: "Uluslararası toptan ticaret fiyat hesaplayıcısı",
@@ -278,6 +290,10 @@ export const translations = {
     tarih: "Tarih",
     valorTarihi: "Valör Tarihi",
     contractNo: "Swift Açıklaması / Contract No",
+    invoiceModalTitle: "Proforma Invoice",
+    unitPrice: "Birim fiyat (unit price)",
+    totalPrice: "Toplam fiyat (total price)",
+    quantityAuto: "Miktar (otomatik)",
   },
   zh: {
     appSubtitle: "国际批发贸易价格计算器",
@@ -346,6 +362,10 @@ export const translations = {
     tarih: "日期 (Tarih)",
     valorTarihi: "起息日 (Valör Tarihi)",
     contractNo: "Swift 说明 / 合同号",
+    invoiceModalTitle: "形式发票 (Proforma Invoice)",
+    unitPrice: "单价 (unit price)",
+    totalPrice: "总价 (total price)",
+    quantityAuto: "数量 (自动计算)",
   },
 };
 

@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
-import { getVakifCompanies } from "../api/client";
+import { getInvoiceCompanies, getVakifCompanies } from "../api/client";
 import { useLanguage } from "../LanguageContext";
 import VakifTransferModal from "./VakifTransferModal";
+import InvoiceModal from "./InvoiceModal";
 
 export default function DocsPage({ onBack }) {
   const { t } = useLanguage();
-  const [companies, setCompanies] = useState([]);
+  const [bankCompanies, setBankCompanies] = useState([]);
+  const [invoiceCompanies, setInvoiceCompanies] = useState([]);
   const [error, setError] = useState(null);
-  const [activeCompany, setActiveCompany] = useState(null);
+  const [activeBankCompany, setActiveBankCompany] = useState(null);
+  const [activeInvoiceCompany, setActiveInvoiceCompany] = useState(null);
 
   useEffect(() => {
-    getVakifCompanies().then(setCompanies).catch((err) => setError(err.message));
+    getVakifCompanies().then(setBankCompanies).catch((err) => setError(err.message));
+    getInvoiceCompanies().then(setInvoiceCompanies).catch((err) => setError(err.message));
   }, []);
 
   return (
@@ -22,15 +26,16 @@ export default function DocsPage({ onBack }) {
         <h1 className="text-xl font-bold">{t("docsNav")}</h1>
       </header>
 
+      {error && <div className="glass-card p-4 text-red-400 text-sm">{error}</div>}
+
       <section className="glass-card p-4 space-y-3">
         <h2 className="text-sm font-semibold text-neon-violet uppercase tracking-wide">{t("bankDocsTitle")}</h2>
-        {error && <div className="text-sm text-red-400">{error}</div>}
-        {companies.length === 0 && !error && <div className="text-sm text-slate-400">{t("loading")}</div>}
+        {bankCompanies.length === 0 && !error && <div className="text-sm text-slate-400">{t("loading")}</div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {companies.map((c) => (
+          {bankCompanies.map((c) => (
             <button
               key={c.key}
-              onClick={() => setActiveCompany(c)}
+              onClick={() => setActiveBankCompany(c)}
               className="action-btn justify-start text-left"
             >
               🏦 {c.label}
@@ -41,10 +46,22 @@ export default function DocsPage({ onBack }) {
 
       <section className="glass-card p-4 space-y-3">
         <h2 className="text-sm font-semibold text-neon-violet uppercase tracking-wide">{t("invoiceTitle")}</h2>
-        <div className="text-sm text-slate-400">{t("comingSoon")}</div>
+        {invoiceCompanies.length === 0 && !error && <div className="text-sm text-slate-400">{t("comingSoon")}</div>}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {invoiceCompanies.map((c) => (
+            <button
+              key={c.key}
+              onClick={() => setActiveInvoiceCompany(c)}
+              className="action-btn justify-start text-left"
+            >
+              📄 {c.label}
+            </button>
+          ))}
+        </div>
       </section>
 
-      <VakifTransferModal company={activeCompany} onClose={() => setActiveCompany(null)} />
+      <VakifTransferModal company={activeBankCompany} onClose={() => setActiveBankCompany(null)} />
+      <InvoiceModal company={activeInvoiceCompany} onClose={() => setActiveInvoiceCompany(null)} />
     </div>
   );
 }

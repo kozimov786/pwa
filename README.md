@@ -21,12 +21,19 @@ SQLite DB (`backend/data/trade.db`) is auto-created and seeded with two demo pro
 ("Kabuklu 33", "Xinpu 60%"), the China→Tashkent backbone costs, and four demo destinations
 on first run.
 
-**LibreOffice is required** for the Vakıfbank China-transfer feature (docx→PDF conversion):
+**LibreOffice is required** for the Vakıfbank transfer and Invoice docx→PDF features:
 ```bash
 brew install --cask libreoffice
 ln -sf /Applications/LibreOffice.app/Contents/MacOS/soffice /opt/homebrew/bin/soffice
 ```
 Everything else works without it.
+
+This LibreOffice cask ships with no fontconfig.conf, so on first Invoice generation the backend
+auto-copies the bundled `assets/fonts/NotoSansSC.ttf` into
+`LibreOffice.app/Contents/Resources/fonts/truetype/` (see `services/docx_pdf.py`) — otherwise
+Chinese text in the invoice template renders as blank instead of tofu boxes, since LibreOffice's
+headless export doesn't substitute a fallback font for missing glyphs the way Word does. On a
+Linux deployment, install a system CJK package instead (e.g. `fonts-noto-cjk`).
 
 ### Endpoints
 
@@ -39,6 +46,8 @@ Everything else works without it.
 | POST | `/api/export/pdf` \| `/api/export/excel` | quotation documents, localized via `lang` (en/uz/ru/tr/zh) |
 | GET | `/api/vakif-transfer/companies` | list of beneficiary companies with a Vakıfbank docx template |
 | POST | `/api/vakif-transfer/generate` | fills the real Vakıfbank docx wire-transfer form for a Chinese supplier and converts it to PDF (content stays Turkish, never translated) |
+| GET | `/api/invoice/companies` | list of sellers with a proforma-invoice docx template |
+| POST | `/api/invoice/generate` | fills the real proforma invoice docx for a Chinese seller and converts it to PDF; Quantity is derived as Total Price / Unit Price, never entered |
 | POST | `/api/voice/parse` | audio → Whisper transcript → parsed product/weight |
 
 ### Adding a new Vakıfbank beneficiary company
@@ -48,6 +57,13 @@ Drop a filled-in-once `.docx` copy of the Vakıfbank wire-transfer form for that
 `backend/app/services/vakif_transfer.py` with the exact fixed-text prefix found in that template
 for each of the four dynamic fields (Tarih, amount-in-words, Valör, Swift Açıklaması/Contract No).
 No other code changes needed.
+
+### Adding a new invoice seller
+
+Drop a filled-in-once `.docx` copy of that seller's proforma invoice into
+`backend/app/assets/invoice_templates/`, then add an entry to `INVOICE_TEMPLATES` in
+`backend/app/services/invoice.py` with the Tarih/Contract prefixes and the line-item/totals table
+row & column indices found in that template.
 
 ## Frontend (Vite + React + Tailwind, PWA)
 
@@ -63,9 +79,9 @@ Supports English, Uzbek, Russian, Turkish and Chinese — switch via the languag
 header; the selection also controls the language of generated PDF/Excel quotations.
 
 The **Docs** button in the header opens a separate page (not part of the calculator) listing
-official documents: bank transfers (per beneficiary company, from `/api/vakif-transfer/companies`)
-and an Invoice section (placeholder until a template is provided). Picking a company opens a modal
-with just the transaction-specific fields for that transfer.
+official documents: Bank Transfers and Invoice, each showing one button per company that has a
+docx template. Picking a company opens a modal with just the transaction-specific fields for that
+document — everything else (beneficiary/seller/bank details) comes straight from the template.
 
 ## Notes
 

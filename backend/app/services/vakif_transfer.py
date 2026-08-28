@@ -18,12 +18,11 @@ from __future__ import annotations
 
 import io
 import os
-import subprocess
-import tempfile
 from dataclasses import dataclass
 
 import docx
 
+from .docx_pdf import docx_bytes_to_pdf, replace_after_prefix, set_paragraph_text
 from .turkish_numbers import number_to_words_tr, turkish_upper
 
 ASSETS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "bank_templates")
@@ -72,22 +71,6 @@ def amount_to_words_caps(amount: float, currency: str) -> str:
     return text
 
 
-def _set_paragraph_text(paragraph, new_text: str):
-    if not paragraph.runs:
-        paragraph.add_run(new_text)
-        return
-    paragraph.runs[0].text = new_text
-    for run in paragraph.runs[1:]:
-        run.text = ""
-
-
-def _replace_after_prefix(paragraph, prefix: str, new_value: str) -> bool:
-    if not paragraph.text.startswith(prefix):
-        return False
-    _set_paragraph_text(paragraph, prefix + new_value)
-    return True
-
-
 def fill_template_docx(
     template: CompanyTemplate,
     tarih: str,
@@ -104,37 +87,16 @@ def fill_template_docx(
     amount_words = amount_to_words_caps(amount, currency)
 
     for p in doc.paragraphs:
-        _replace_after_prefix(p, template.date_prefix, tarih)
-        _replace_after_prefix(p, template.words_prefix, amount_words)
-        _replace_after_prefix(p, template.valor_prefix, valor_tarihi)
-        _replace_after_prefix(p, template.contract_prefix, contract_no)
+        replace_after_prefix(p, template.date_prefix, tarih)
+        replace_after_prefix(p, template.words_prefix, amount_words)
+        replace_after_prefix(p, template.valor_prefix, valor_tarihi)
+        replace_after_prefix(p, template.contract_prefix, contract_no)
         if template.amount_paragraph_is_standalone and p.text.strip().endswith(("$", "€", "¥", "₺")):
-            _set_paragraph_text(p, amount_line)
+            set_paragraph_text(p, amount_line)
 
     buf = io.BytesIO()
     doc.save(buf)
     return buf.getvalue()
-
-
-def docx_bytes_to_pdf(docx_bytes: bytes) -> bytes:
-    with tempfile.TemporaryDirectory() as tmp:
-        docx_path = os.path.join(tmp, "form.docx")
-        with open(docx_path, "wb") as f:
-            f.write(docx_bytes)
-
-        subprocess.run(
-            [
-                "soffice", "--headless", "--norestore",
-                "--convert-to", "pdf", "--outdir", tmp, docx_path,
-            ],
-            check=True,
-            capture_output=True,
-            timeout=60,
-        )
-
-        pdf_path = os.path.join(tmp, "form.pdf")
-        with open(pdf_path, "rb") as f:
-            return f.read()
 
 
 def generate_transfer_pdf(

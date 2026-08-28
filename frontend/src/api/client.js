@@ -124,6 +124,15 @@ export function generateVakifTransfer(payload, filename = "vakifbank_transfer.pd
   return downloadBlob("/vakif-transfer/generate", payload, filename);
 }
 
+export async function getInvoiceCompanies() {
+  const res = await handle(await fetch(`${BASE}/invoice/companies`));
+  return res.json();
+}
+
+export function generateInvoice(payload, filename = "proforma_invoice.pdf") {
+  return downloadBlob("/invoice/generate", payload, filename);
+}
+
 export async function parseVoice(audioBlob) {
   const form = new FormData();
   form.append("audio", audioBlob, "voice.webm");
