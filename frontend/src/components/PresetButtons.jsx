@@ -1,61 +1,77 @@
-export function ProductPresets({ products, selectedId, onSelect }) {
+import { useState } from "react";
+
+export function ProductSelect({ products, selectedId, onSelect, onAddProduct }) {
+  const [newName, setNewName] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submitNew() {
+    const name = newName.trim();
+    if (!name || busy) return;
+    setBusy(true);
+    try {
+      await onAddProduct(name);
+      setNewName("");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <div className="flex flex-wrap gap-2">
-      {products.map((p) => (
-        <button
-          key={p.id}
-          onClick={() => onSelect(p.id)}
-          className={`neon-btn ${selectedId === p.id ? "neon-btn-active" : ""}`}
-        >
-          {p.name}
-        </button>
-      ))}
+    <div className="flex flex-wrap gap-2 items-center">
+      <select
+        value={selectedId ?? ""}
+        onChange={(e) => onSelect(parseInt(e.target.value, 10))}
+        className="bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm min-w-[180px]
+                   focus:outline-none focus:border-neon-cyan/60"
+      >
+        {products.length === 0 && <option value="">Mahsulot yo'q</option>}
+        {products.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
+        ))}
+      </select>
+
+      <input
+        type="text"
+        value={newName}
+        onChange={(e) => setNewName(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && submitNew()}
+        placeholder="Yangi mahsulot nomi"
+        className="bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm w-44
+                   focus:outline-none focus:border-neon-cyan/60"
+      />
+      <button onClick={submitNew} disabled={busy || !newName.trim()} className="neon-btn">
+        {busy ? "…" : "+ Qo'shish"}
+      </button>
     </div>
   );
 }
 
-const TONNAGE_PRESETS = [21, 22];
+const WEIGHT_PRESETS_KG = [20000, 21000, 22000, 20800];
 
-export function TonnagePresets({ tonnage, onChange }) {
+export function WeightPresets({ weightKg, onChange }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {TONNAGE_PRESETS.map((t) => (
+      {WEIGHT_PRESETS_KG.map((kg) => (
         <button
-          key={t}
-          onClick={() => onChange(t)}
-          className={`neon-btn ${tonnage === t ? "neon-btn-active" : ""}`}
+          key={kg}
+          onClick={() => onChange(kg)}
+          className={`neon-btn ${weightKg === kg ? "neon-btn-active" : ""}`}
         >
-          {t} t
+          {kg.toLocaleString()} kg
         </button>
       ))}
       <input
         type="number"
         min="0"
-        step="0.1"
-        value={tonnage}
+        step="100"
+        value={weightKg}
         onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-        className="w-24 bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm
+        className="w-28 bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm
                    focus:outline-none focus:border-neon-cyan/60"
-        placeholder="Custom t"
+        placeholder="Custom kg"
       />
-    </div>
-  );
-}
-
-const CURRENCIES = ["USD", "CNY", "EUR"];
-
-export function CurrencyToggle({ currency, onChange }) {
-  return (
-    <div className="flex gap-2">
-      {CURRENCIES.map((c) => (
-        <button
-          key={c}
-          onClick={() => onChange(c)}
-          className={`neon-btn ${currency === c ? "neon-btn-active" : ""}`}
-        >
-          {c}
-        </button>
-      ))}
     </div>
   );
 }

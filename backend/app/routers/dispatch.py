@@ -16,16 +16,16 @@ async def _run_dispatch(payload: schemas.DispatchRequest):
     if payload.calculate_payload and (payload.include_pdf or payload.include_excel):
         db: Session = SessionLocal()
         try:
-            calc = build_calculation(db, payload.calculate_payload)
+            calc = await build_calculation(db, payload.calculate_payload)
         finally:
             db.close()
         legs = [d.model_dump() for d in calc.destinations]
         safe_name = calc.product.name.replace(" ", "_")
         if payload.include_pdf:
-            pdf_bytes = generate_quotation_pdf(calc.product.name, calc.tonnage, calc.base_price_usd_per_ton, legs)
+            pdf_bytes = generate_quotation_pdf(calc.product.name, calc.weight_kg, calc.base_price_usd_per_kg, legs)
             attachments.append((pdf_bytes, f"quotation_{safe_name}.pdf"))
         if payload.include_excel:
-            xlsx_bytes = generate_quotation_excel(calc.product.name, calc.tonnage, calc.base_price_usd_per_ton, legs)
+            xlsx_bytes = generate_quotation_excel(calc.product.name, calc.weight_kg, calc.base_price_usd_per_kg, legs)
             attachments.append((xlsx_bytes, f"quotation_{safe_name}.xlsx"))
 
     await dispatch_to_group(payload.message, attachments)

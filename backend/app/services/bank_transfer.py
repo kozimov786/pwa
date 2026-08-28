@@ -8,6 +8,8 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
+from .pdf_generator import _letterhead
+
 CURRENCY_WORDS_TR = {
     "USD": ("Amerikan Doları", "Sent"),
     "EUR": ("Euro", "Sent"),
@@ -77,7 +79,9 @@ def generate_bank_transfer_pdf(
     )
 
     elements = [
-        Paragraph("Havale / EFT Talimatı", title_style),
+        _letterhead(title_style),
+        Spacer(1, 4 * mm),
+        Paragraph("Havale / EFT Talimatı", ParagraphStyle("Sub2", parent=normal, fontSize=14)),
         Paragraph("Turkish Bank Transfer Instruction", normal),
         Spacer(1, 8 * mm),
         table,

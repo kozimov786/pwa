@@ -5,13 +5,13 @@ from .database import Base
 
 
 class Product(Base):
-    """Catalog of tradable products, e.g. 'Kabuklu 33', 'Xinpu 60%'."""
+    """Catalog of tradable products, e.g. 'Kabuklu 33', 'Xinpu 60%'.
+    Purchase price is entered fresh on every calculation, not stored here."""
 
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True, nullable=False)
-    price_cny_per_ton = Column(Float, nullable=False, default=0.0)
     oil_content = Column(String, nullable=True)  # e.g. "33%", "60%"
     packaging = Column(String, nullable=True)  # e.g. "50kg jute bags"
     is_active = Column(Boolean, default=True)
@@ -20,8 +20,9 @@ class Product(Base):
 
 
 class ExpenseSettings(Base):
-    """Singleton row holding all dynamic transit-leg costs (USD per ton)
-    and FX rates used across the landed-price cascade."""
+    """Singleton row holding all dynamic transit-leg costs (USD per ton).
+    usd_cny_rate_fallback is only used when the live daily FX rate
+    cannot be fetched (e.g. no internet access)."""
 
     __tablename__ = "expense_settings"
 
@@ -37,8 +38,6 @@ class ExpenseSettings(Base):
     tashkent_romania_freight = Column(Float, default=0.0)
     tashkent_baku_freight = Column(Float, default=0.0)
 
-    # FX rates
-    usd_cny_rate = Column(Float, default=7.24)
-    usd_eur_rate = Column(Float, default=0.92)
+    usd_cny_rate_fallback = Column(Float, default=7.24)
 
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

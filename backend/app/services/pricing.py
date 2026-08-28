@@ -1,67 +1,71 @@
-"""Landed-price cascade engine.
+"""Landed-price cascade engine — all figures in USD per kg.
 
 Route modeled:
-  China (ex-works, CNY) -> Osh, Kyrgyzstan (CPT/DAP)
-                         -> Tashkent, Uzbekistan (DAP)
-                            -> Gaziantep / Mersin, Turkey (DAP)
-                            -> Baku, Azerbaijan (DAP)
-                            -> Romania (DAP, quoted in USD & EUR)
+  China (purchase price, CNY/kg) -> Osh, Kyrgyzstan (CPT/DAP)
+                                  -> Tashkent, Uzbekistan (DAP)
+                                     -> Gaziantep / Mersin, Turkey (DAP)
+                                     -> Baku, Azerbaijan (DAP)
+                                     -> Romania (DAP)
 
-All transit-leg costs are USD/ton. The product's base price is stored in
-CNY/ton and converted using the live/settings FX rate.
+Transit-leg costs are configured in USD/ton (the trade-standard unit) and
+converted to USD/kg internally so the whole cascade — and the UI — works
+in a single unit: kilograms.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..models import ExpenseSettings, Product
+from ..models import ExpenseSettings
+
+KG_PER_TON = 1000.0
 
 
 @dataclass
 class Leg:
     destination: str
-    incoterm: str
-    price_per_ton_usd: float
-    price_per_ton_eur: float | None = None
+    price_per_kg_usd: float
 
 
 def calculate_landed_prices(
-    product: Product,
     expenses: ExpenseSettings,
-    tonnage: float,
-    margin_usd_per_ton: float = 0.0,
+    price_cny_per_kg: float,
+    usd_cny_rate: float,
+    margin_usd_per_kg: float = 0.0,
 ) -> tuple[float, list[Leg]]:
-    base_usd_per_ton = (product.price_cny_per_ton / expenses.usd_cny_rate) + margin_usd_per_ton
+    base_usd_per_kg = (price_cny_per_kg / usd_cny_rate) + margin_usd_per_kg
 
-    osh_price = base_usd_per_ton + expenses.cn_docs + expenses.cn_osh_freight + expenses.kg_transit
-    tashkent_price = osh_price + expenses.osh_tashkent_freight + expenses.uzb_transit
-    antep_price = tashkent_price + expenses.tashkent_antep_freight
-    baku_price = tashkent_price + expenses.tashkent_baku_freight
-    romania_price_usd = tashkent_price + expenses.tashkent_romania_freight
-    romania_price_eur = romania_price_usd * expenses.usd_eur_rate
+    cn_docs = expenses.cn_docs / KG_PER_TON
+    cn_osh_freight = expenses.cn_osh_freight / KG_PER_TON
+    kg_transit = expenses.kg_transit / KG_PER_TON
+    osh_tashkent_freight = expenses.osh_tashkent_freight / KG_PER_TON
+    uzb_transit = expenses.uzb_transit / KG_PER_TON
+    tashkent_antep_freight = expenses.tashkent_antep_freight / KG_PER_TON
+    tashkent_romania_freight = expenses.tashkent_romania_freight / KG_PER_TON
+    tashkent_baku_freight = expenses.tashkent_baku_freight / KG_PER_TON
+
+    osh_price = base_usd_per_kg + cn_docs + cn_osh_freight + kg_transit
+    tashkent_price = osh_price + osh_tashkent_freight + uzb_transit
+    antep_price = tashkent_price + tashkent_antep_freight
+    baku_price = tashkent_price + tashkent_baku_freight
+    romania_price = tashkent_price + tashkent_romania_freight
 
     legs = [
-        Leg("Osh", "CPT/DAP", round(osh_price, 2)),
-        Leg("Tashkent", "DAP", round(tashkent_price, 2)),
-        Leg("Gaziantep / Mersin", "DAP", round(antep_price, 2)),
-        Leg("Baku", "DAP", round(baku_price, 2)),
-        Leg("Romania", "DAP", round(romania_price_usd, 2), round(romania_price_eur, 2)),
+        Leg("Osh (CPT/DAP)", round(osh_price, 4)),
+        Leg("Tashkent (DAP)", round(tashkent_price, 4)),
+        Leg("Gaziantep / Mersin (DAP)", round(antep_price, 4)),
+        Leg("Baku (DAP)", round(baku_price, 4)),
+        Leg("Romania (DAP)", round(romania_price, 4)),
     ]
-    return round(base_usd_per_ton, 2), legs
+    return round(base_usd_per_kg, 4), legs
 
 
-def legs_to_response(legs: list[Leg], tonnage: float) -> list[dict]:
-    out = []
-    for leg in legs:
-        out.append(
-            {
-                "destination": leg.destination,
-                "incoterm": leg.incoterm,
-                "price_per_ton_usd": leg.price_per_ton_usd,
-                "price_per_ton_eur": leg.price_per_ton_eur,
-                "total_usd": round(leg.price_per_ton_usd * tonnage, 2),
-                "total_eur": round(leg.price_per_ton_eur * tonnage, 2) if leg.price_per_ton_eur else None,
-            }
-        )
-    return out
+def legs_to_response(legs: list[Leg], weight_kg: float) -> list[dict]:
+    return [
+        {
+            "destination": leg.destination,
+            "price_per_kg_usd": leg.price_per_kg_usd,
+            "total_usd": round(leg.price_per_kg_usd * weight_kg, 2),
+        }
+        for leg in legs
+    ]

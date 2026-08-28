@@ -1,4 +1,5 @@
 import io
+import os
 from datetime import date
 
 from reportlab.lib import colors
@@ -11,14 +12,24 @@ from reportlab.platypus import (
     TableStyle,
     Paragraph,
     Spacer,
+    Image,
 )
 
 DARK_BG = colors.HexColor("#0f172a")
-NEON = colors.HexColor("#22d3ee")
-ROW_ALT = colors.HexColor("#1e293b")
+LOGO_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "logo.png")
 
 
-def generate_quotation_pdf(product_name: str, tonnage: float, base_price: float, legs: list[dict]) -> bytes:
+def _letterhead(title_style):
+    logo = Image(LOGO_PATH, width=16 * mm, height=16 * mm) if os.path.exists(LOGO_PATH) else Spacer(16 * mm, 16 * mm)
+    header = Table(
+        [[logo, Paragraph("GOKLE", title_style)]],
+        colWidths=[20 * mm, None],
+    )
+    header.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LEFTPADDING", (1, 0), (1, 0), 6)]))
+    return header
+
+
+def generate_quotation_pdf(product_name: str, weight_kg: float, base_price_usd_per_kg: float, legs: list[dict]) -> bytes:
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
         buf, pagesize=A4, topMargin=20 * mm, bottomMargin=20 * mm, leftMargin=18 * mm, rightMargin=18 * mm
@@ -30,27 +41,31 @@ def generate_quotation_pdf(product_name: str, tonnage: float, base_price: float,
     sub_style = ParagraphStyle("Sub", parent=styles["Normal"], textColor=colors.grey, fontSize=10)
 
     elements = [
-        Paragraph("Wholesale Trade Quotation", title_style),
+        _letterhead(title_style),
+        Spacer(1, 4 * mm),
+        Paragraph("Wholesale Trade Quotation", ParagraphStyle("Sub2", parent=sub_style, fontSize=12, textColor=DARK_BG)),
         Paragraph(f"Product: <b>{product_name}</b> &nbsp;|&nbsp; Date: {date.today().isoformat()}", sub_style),
-        Paragraph(f"Tonnage: <b>{tonnage} t</b> &nbsp;|&nbsp; Base ex-works price: <b>${base_price}/t</b>", sub_style),
+        Paragraph(
+            f"Weight: <b>{weight_kg:,.0f} kg</b> &nbsp;|&nbsp; Base purchase price: <b>${base_price_usd_per_kg}/kg</b>",
+            sub_style,
+        ),
         Spacer(1, 10 * mm),
     ]
 
-    header = ["Destination", "Incoterm", "USD/ton", "EUR/ton", "Total USD", "Total EUR"]
+    header = ["Mahsulot", "Yo'nalish", "Jami kg", "1 kg narx (USD)", "Jami maliyet (USD)"]
     data = [header]
     for leg in legs:
         data.append(
             [
+                product_name,
                 leg["destination"],
-                leg["incoterm"],
-                f"{leg['price_per_ton_usd']:.2f}",
-                f"{leg['price_per_ton_eur']:.2f}" if leg.get("price_per_ton_eur") else "-",
-                f"{leg['total_usd']:.2f}",
-                f"{leg['total_eur']:.2f}" if leg.get("total_eur") else "-",
+                f"{weight_kg:,.0f}",
+                f"{leg['price_per_kg_usd']:.4f}",
+                f"{leg['total_usd']:,.2f}",
             ]
         )
 
-    table = Table(data, colWidths=[38 * mm, 22 * mm, 22 * mm, 22 * mm, 26 * mm, 26 * mm])
+    table = Table(data, colWidths=[32 * mm, 42 * mm, 24 * mm, 32 * mm, 32 * mm])
     style = [
         ("BACKGROUND", (0, 0), (-1, 0), DARK_BG),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),

@@ -19,6 +19,17 @@ export async function getProducts() {
   return res.json();
 }
 
+export async function createProduct(name) {
+  const res = await handle(
+    await fetch(`${BASE}/products`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    })
+  );
+  return res.json();
+}
+
 export async function getExpenses() {
   const res = await handle(await fetch(`${BASE}/expenses`));
   return res.json();

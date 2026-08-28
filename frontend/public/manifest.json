@@ -1,7 +1,7 @@
 {
-  "name": "Wholesale Trade Calc",
-  "short_name": "TradeCalc",
-  "description": "Ultra-fast landed price calculator for international wholesale trade",
+  "name": "GOKLE",
+  "short_name": "GOKLE",
+  "description": "GOKLE — xalqaro ulgurji savdo narx kalkulyatori",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

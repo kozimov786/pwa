@@ -12,10 +12,10 @@ router = APIRouter(prefix="/api/export", tags=["export"])
 
 
 @router.post("/pdf")
-def export_pdf(payload: schemas.CalculateRequest, db: Session = Depends(get_db)):
-    calc = build_calculation(db, payload)
+async def export_pdf(payload: schemas.CalculateRequest, db: Session = Depends(get_db)):
+    calc = await build_calculation(db, payload)
     pdf_bytes = generate_quotation_pdf(
-        calc.product.name, calc.tonnage, calc.base_price_usd_per_ton,
+        calc.product.name, calc.weight_kg, calc.base_price_usd_per_kg,
         [d.model_dump() for d in calc.destinations],
     )
     filename = f"quotation_{calc.product.name.replace(' ', '_')}.pdf"
@@ -27,10 +27,10 @@ def export_pdf(payload: schemas.CalculateRequest, db: Session = Depends(get_db))
 
 
 @router.post("/excel")
-def export_excel(payload: schemas.CalculateRequest, db: Session = Depends(get_db)):
-    calc = build_calculation(db, payload)
+async def export_excel(payload: schemas.CalculateRequest, db: Session = Depends(get_db)):
+    calc = await build_calculation(db, payload)
     xlsx_bytes = generate_quotation_excel(
-        calc.product.name, calc.tonnage, calc.base_price_usd_per_ton,
+        calc.product.name, calc.weight_kg, calc.base_price_usd_per_kg,
         [d.model_dump() for d in calc.destinations],
     )
     filename = f"quotation_{calc.product.name.replace(' ', '_')}.xlsx"

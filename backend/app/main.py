@@ -8,8 +8,8 @@ from .database import Base, SessionLocal, engine
 from .routers import bank_transfer, calculate, dispatch, expenses, export, products, voice
 
 SEED_PRODUCTS = [
-    {"name": "Kabuklu 33", "price_cny_per_ton": 6800.0, "oil_content": "33%", "packaging": "50kg jute bags"},
-    {"name": "Xinpu 60%", "price_cny_per_ton": 8200.0, "oil_content": "60%", "packaging": "50kg jute bags"},
+    {"name": "Kabuklu 33", "oil_content": "33%", "packaging": "50kg jute bags"},
+    {"name": "Xinpu 60%", "oil_content": "60%", "packaging": "50kg jute bags"},
 ]
 
 
@@ -31,8 +31,7 @@ def seed_data():
                     tashkent_antep_freight=210.0,
                     tashkent_romania_freight=260.0,
                     tashkent_baku_freight=150.0,
-                    usd_cny_rate=7.24,
-                    usd_eur_rate=0.92,
+                    usd_cny_rate_fallback=7.24,
                 )
             )
         db.commit()

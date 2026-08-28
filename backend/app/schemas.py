@@ -6,7 +6,6 @@ from pydantic import BaseModel, ConfigDict
 
 class ProductBase(BaseModel):
     name: str
-    price_cny_per_ton: float
     oil_content: Optional[str] = None
     packaging: Optional[str] = None
     is_active: bool = True
@@ -32,8 +31,7 @@ class ExpensesBase(BaseModel):
     tashkent_antep_freight: float = 0.0
     tashkent_romania_freight: float = 0.0
     tashkent_baku_freight: float = 0.0
-    usd_cny_rate: float = 7.24
-    usd_eur_rate: float = 0.92
+    usd_cny_rate_fallback: float = 7.24
 
 
 class ExpensesUpdate(ExpensesBase):
@@ -48,23 +46,24 @@ class ExpensesOut(ExpensesBase):
 
 class CalculateRequest(BaseModel):
     product_id: int
-    tonnage: float = 21.0
-    margin_usd_per_ton: float = 0.0
+    weight_kg: float = 21000.0
+    price_cny_per_kg: float
+    margin_usd_per_kg: float = 0.0
 
 
 class DestinationPrice(BaseModel):
     destination: str
-    incoterm: str
-    price_per_ton_usd: float
-    price_per_ton_eur: Optional[float] = None
+    price_per_kg_usd: float
     total_usd: float
-    total_eur: Optional[float] = None
 
 
 class CalculateResponse(BaseModel):
     product: ProductOut
-    tonnage: float
-    base_price_usd_per_ton: float
+    weight_kg: float
+    price_cny_per_kg: float
+    usd_cny_rate: float
+    fx_is_live: bool
+    base_price_usd_per_kg: float
     destinations: list[DestinationPrice]
 
 
