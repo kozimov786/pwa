@@ -1,8 +1,11 @@
-# Wholesale Trade Calc — PWA
+# GOKLE — Wholesale Trade Calc PWA
 
 International wholesale trade landed-price calculator: FastAPI backend + React/Tailwind PWA frontend.
 
-Route modeled: China (ex-works) → Osh, KG (CPT/DAP) → Tashkent, UZ (DAP) → Gaziantep/Mersin, Baku, Romania (DAP, USD & EUR).
+Route modeled: China (purchase price, CNY/kg) → Osh, KG (CPT/DAP) → Tashkent, UZ (DAP) → any number of
+user-managed destinations from Tashkent (Gaziantep/Mersin, Azerbaijan-Baku, Romania, Syria, ...).
+Every transit leg is configured as a **fixed total cost per shipment** (one truck/container) and divided
+by the actual shipment weight at calculation time — not a per-ton rate.
 
 ## Backend (FastAPI)
 
@@ -15,19 +18,37 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 SQLite DB (`backend/data/trade.db`) is auto-created and seeded with two demo products
-("Kabuklu 33", "Xinpu 60%") and default transit-leg costs on first run.
+("Kabuklu 33", "Xinpu 60%"), the China→Tashkent backbone costs, and four demo destinations
+on first run.
+
+**LibreOffice is required** for the Vakıfbank China-transfer feature (docx→PDF conversion):
+```bash
+brew install --cask libreoffice
+ln -sf /Applications/LibreOffice.app/Contents/MacOS/soffice /opt/homebrew/bin/soffice
+```
+Everything else works without it.
 
 ### Endpoints
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET/POST | `/api/products` | product catalog |
-| GET/PUT | `/api/expenses` | transit-leg costs & FX rates |
-| POST | `/api/calculate` | landed price cascade |
-| POST | `/api/export/pdf` \| `/api/export/excel` | quotation documents |
-| POST | `/api/bank-transfer-talimati` | Turkish bank transfer instruction PDF |
+| GET/POST | `/api/products` | product catalog (name/oil-content/packaging; price is entered per calculation) |
+| GET/PUT | `/api/expenses` | China→Tashkent backbone costs (fixed per shipment) & FX fallback |
+| GET/POST/PUT/DELETE | `/api/destinations` | user-managed final legs from Tashkent — add new routes with no code change |
+| POST | `/api/calculate` | landed price cascade, all figures in USD/kg, live daily USD/CNY rate |
+| POST | `/api/export/pdf` \| `/api/export/excel` | quotation documents, localized via `lang` (en/uz/ru/tr/zh) |
+| POST | `/api/bank-transfer-talimati` | generic Turkish bank transfer instruction PDF |
+| POST | `/api/vakif-transfer/generate` | fills the real Vakıfbank docx wire-transfer form for a Chinese supplier and converts it to PDF (content stays Turkish, never translated) |
 | POST | `/api/dispatch-group` | async send quotation to WhatsApp group (Green-API) |
-| POST | `/api/voice/parse` | audio → Whisper transcript → parsed product/tonnage/currency |
+| POST | `/api/voice/parse` | audio → Whisper transcript → parsed product/weight |
+
+### Adding a new Vakıfbank beneficiary company
+
+Drop a filled-in-once `.docx` copy of the Vakıfbank wire-transfer form for that company into
+`backend/app/assets/bank_templates/`, then add an entry to `COMPANY_TEMPLATES` in
+`backend/app/services/vakif_transfer.py` with the exact fixed-text prefix found in that template
+for each of the four dynamic fields (Tarih, amount-in-words, Valör, Swift Açıklaması/Contract No).
+No other code changes needed.
 
 ## Frontend (Vite + React + Tailwind, PWA)
 
@@ -39,8 +60,12 @@ npm run dev       # http://localhost:5173, proxies /api to :8000
 
 Production build: `npm run build` → `dist/` (installable PWA via `manifest.json` + `sw.js`).
 
+Supports English, Uzbek, Russian, Turkish and Chinese — switch via the language selector in the
+header; the selection also controls the language of generated PDF/Excel quotations.
+
 ## Notes
 
 - Voice parsing uses OpenAI's Whisper API (`OPENAI_API_KEY`). No local model/ffmpeg required.
 - WhatsApp dispatch uses [Green-API](https://green-api.com) — set `GREEN_API_ID_INSTANCE`, `GREEN_API_TOKEN`, `GREEN_API_GROUP_ID`.
 - All landed prices are computed server-side in `app/services/pricing.py` — the single source of truth for the cost cascade.
+- PDF quotations embed the SIL-OFL-licensed NotoSans font (Cyrillic/Turkish) and reportlab's built-in STSong-Light CID font (Chinese) so ru/tr/zh render correctly — the base-14 PDF fonts can't.

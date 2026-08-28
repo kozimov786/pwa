@@ -130,6 +130,15 @@ export function bankTransferTalimati(payload, filename = "bank_transfer_talimati
   return downloadBlob("/bank-transfer-talimati", payload, filename);
 }
 
+export async function getVakifCompanies() {
+  const res = await handle(await fetch(`${BASE}/vakif-transfer/companies`));
+  return res.json();
+}
+
+export function generateVakifTransfer(payload, filename = "vakifbank_transfer.pdf") {
+  return downloadBlob("/vakif-transfer/generate", payload, filename);
+}
+
 export async function parseVoice(audioBlob) {
   const form = new FormData();
   form.append("audio", audioBlob, "voice.webm");

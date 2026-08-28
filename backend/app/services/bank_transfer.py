@@ -1,7 +1,6 @@
 import io
 from datetime import date
 
-from num2words import num2words
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -10,6 +9,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 
 from .fonts import font_for_lang
 from .pdf_generator import _letterhead
+from .turkish_numbers import number_to_words_tr
 
 CURRENCY_WORDS_TR = {
     "USD": ("Amerikan Doları", "Sent"),
@@ -23,10 +23,10 @@ def amount_to_turkish_words(amount: float, currency: str) -> str:
     major = int(amount)
     minor = round((amount - major) * 100)
     unit_name, minor_name = CURRENCY_WORDS_TR.get(currency, (currency, "Kuruş"))
-    major_words = num2words(major, lang="tr").capitalize()
+    major_words = number_to_words_tr(major).capitalize()
     text = f"{major_words} {unit_name}"
     if minor:
-        minor_words = num2words(minor, lang="tr")
+        minor_words = number_to_words_tr(minor)
         text += f" {minor_words} {minor_name}"
     return text + " (Yalnız)"
 

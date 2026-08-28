@@ -101,6 +101,17 @@ class BankTransferRequest(BaseModel):
     ordering_customer: str = ""
 
 
+# ---------- Vakifbank China Transfer (docx template based) ----------
+
+class VakifTransferRequest(BaseModel):
+    company_key: str
+    tarih: str
+    valor_tarihi: str
+    amount: float
+    currency: str = "USD"
+    contract_no: str = ""
+
+
 # ---------- Dispatch ----------
 
 class DispatchRequest(BaseModel):

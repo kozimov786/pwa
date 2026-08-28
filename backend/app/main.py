@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import models
 from .database import Base, SessionLocal, engine
-from .routers import bank_transfer, calculate, destinations, dispatch, expenses, export, products, voice
+from .routers import bank_transfer, calculate, destinations, dispatch, expenses, export, products, vakif_transfer, voice
 
 SEED_PRODUCTS = [
     {"name": "Kabuklu 33", "oil_content": "33%", "packaging": "50kg jute bags"},
@@ -69,6 +69,7 @@ app.include_router(destinations.router)
 app.include_router(calculate.router)
 app.include_router(export.router)
 app.include_router(bank_transfer.router)
+app.include_router(vakif_transfer.router)
 app.include_router(dispatch.router)
 app.include_router(voice.router)
 
