@@ -1,11 +1,15 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from . import models
 from .database import Base, SessionLocal, engine
 from .routers import calculate, destinations, expenses, export, invoice, products, vakif_transfer, voice
+
+STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
 
 SEED_PRODUCTS = [
     {"name": "Kabuklu 33", "oil_content": "33%", "packaging": "50kg jute bags"},
@@ -76,3 +80,10 @@ app.include_router(voice.router)
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+
+
+# Serves the built frontend (frontend/dist copied to ./static by the Docker
+# build). Mounted last so it never shadows the /api/* routes above — any
+# path not matched by them falls through to this static file server.
+if os.path.isdir(STATIC_DIR):
+    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")

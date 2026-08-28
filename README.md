@@ -78,13 +78,34 @@ Production build: `npm run build` → `dist/` (installable PWA via `manifest.jso
 Supports English, Uzbek, Russian, Turkish and Chinese — switch via the language selector in the
 header; the selection also controls the language of generated PDF/Excel quotations.
 
-The **Docs** button in the header opens a separate page (not part of the calculator) listing
-official documents: Bank Transfers and Invoice, each showing one button per company that has a
-docx template. Picking a company opens a modal with just the transaction-specific fields for that
-document — everything else (beneficiary/seller/bank details) comes straight from the template.
+The **Docs** button in the header opens a separate page (not part of the calculator): pick a bank
+group (currently "Vakıf Bank") → a company → Bank Transfer or Invoice, whichever that company has a
+template for. The modal only asks for the transaction-specific fields — everything else
+(beneficiary/seller/bank details) comes straight from the template.
 
 ## Notes
 
 - Voice parsing uses OpenAI's Whisper API (`OPENAI_API_KEY`). No local model/ffmpeg required.
 - All landed prices are computed server-side in `app/services/pricing.py` — the single source of truth for the cost cascade.
 - PDF quotations embed the SIL-OFL-licensed NotoSans font (Cyrillic/Turkish) and reportlab's built-in STSong-Light CID font (Chinese) so ru/tr/zh render correctly — the base-14 PDF fonts can't.
+
+## Deployment (single container, always-on URL)
+
+The `Dockerfile` at the repo root builds the frontend and bundles it with the backend into one
+image — FastAPI serves both the `/api/*` routes and the built PWA from the same origin, so there's
+no CORS/proxy setup in production. LibreOffice + a bundled CJK font are installed at build time so
+the Docs (Vakıfbank/Invoice) PDFs work out of the box.
+
+**Railway** (recommended — no server to manage, free HTTPS URL):
+1. Push this repo to GitHub (already done: `kozimov786/pwa`).
+2. On [railway.app](https://railway.app), **New Project → Deploy from GitHub repo** → select
+   `kozimov786/pwa`. Railway auto-detects the `Dockerfile`.
+3. **Add a Volume** mounted at `/app/data` — otherwise the SQLite database (products, expenses,
+   destinations you configure) resets on every redeploy.
+4. **Variables** tab → add `OPENAI_API_KEY` (needed only for the voice-input feature; everything
+   else works without it).
+5. Deploy. Railway gives you a permanent `https://<something>.up.railway.app` URL — open it on any
+   phone, from any network, and use **Add to Home Screen** to install it like a native app.
+
+Any other Docker-friendly host (Render, Fly.io, a plain VPS with `docker run`) works the same way —
+just make sure whatever you pick persists `/app/data` across deploys and sets `OPENAI_API_KEY`.
