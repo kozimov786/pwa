@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import { generateVakifTransfer, getVakifCompanies } from "../api/client";
+import { useState } from "react";
+import { generateVakifTransfer } from "../api/client";
 import { useLanguage } from "../LanguageContext";
 
 const EMPTY = {
-  company_key: "",
   tarih: "",
   valor_tarihi: "",
   amount: "",
@@ -11,25 +10,13 @@ const EMPTY = {
   contract_no: "",
 };
 
-export default function VakifTransferModal({ open, onClose }) {
+export default function VakifTransferModal({ company, onClose }) {
   const { t } = useLanguage();
-  const [companies, setCompanies] = useState([]);
   const [form, setForm] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (!open) return;
-    setError(null);
-    getVakifCompanies()
-      .then((list) => {
-        setCompanies(list);
-        setForm((f) => ({ ...f, company_key: f.company_key || list[0]?.key || "" }));
-      })
-      .catch((err) => setError(err.message));
-  }, [open]);
-
-  if (!open) return null;
+  if (!company) return null;
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -47,6 +34,7 @@ export default function VakifTransferModal({ open, onClose }) {
     try {
       await generateVakifTransfer({
         ...form,
+        company_key: company.key,
         tarih: formatDate(form.tarih),
         valor_tarihi: formatDate(form.valor_tarihi),
         amount: parseFloat(form.amount) || 0,
@@ -64,21 +52,8 @@ export default function VakifTransferModal({ open, onClose }) {
       <div className="glass-card w-full max-w-lg p-6 space-y-4">
         <div>
           <h2 className="text-lg font-semibold text-neon-cyan">{t("vakifModalTitle")}</h2>
-          <p className="text-xs text-slate-400 mt-1">{t("vakifHint")}</p>
-        </div>
-
-        <div>
-          <label className="text-xs text-slate-400">{t("company")}</label>
-          <select
-            value={form.company_key}
-            onChange={(e) => update("company_key", e.target.value)}
-            className="w-full mt-1 bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm"
-          >
-            {companies.length === 0 && <option value="">{t("noCompanies")}</option>}
-            {companies.map((c) => (
-              <option key={c.key} value={c.key}>{c.label}</option>
-            ))}
-          </select>
+          <p className="text-xs text-slate-400 mt-1">{company.label}</p>
+          <p className="text-xs text-slate-500 mt-1">{t("vakifHint")}</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -106,7 +81,7 @@ export default function VakifTransferModal({ open, onClose }) {
 
         <div className="flex justify-end gap-2 pt-2">
           <button onClick={onClose} className="neon-btn">{t("cancel")}</button>
-          <button onClick={submit} disabled={busy || !form.company_key} className="action-btn">
+          <button onClick={submit} disabled={busy} className="action-btn">
             {busy ? t("generating") : `🏦 ${t("generatePdf")}`}
           </button>
         </div>

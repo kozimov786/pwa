@@ -115,21 +115,6 @@ export function exportExcel(payload, filename = "quotation.xlsx") {
   return downloadBlob("/export/excel", payload, filename);
 }
 
-export async function dispatchGroup(payload) {
-  const res = await handle(
-    await fetch(`${BASE}/dispatch-group`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-  );
-  return res.json();
-}
-
-export function bankTransferTalimati(payload, filename = "bank_transfer_talimati.pdf") {
-  return downloadBlob("/bank-transfer-talimati", payload, filename);
-}
-
 export async function getVakifCompanies() {
   const res = await handle(await fetch(`${BASE}/vakif-transfer/companies`));
   return res.json();

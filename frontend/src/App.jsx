@@ -6,10 +6,12 @@ import PricingTable from "./components/PricingTable";
 import ActionBar from "./components/ActionBar";
 import SettingsModal from "./components/SettingsModal";
 import LanguageSelect from "./components/LanguageSelect";
+import DocsPage from "./components/DocsPage";
 import { useLanguage } from "./LanguageContext";
 
 export default function App() {
   const { lang, t } = useLanguage();
+  const [view, setView] = useState("calculator");
   const [products, setProducts] = useState([]);
   const [productId, setProductId] = useState(null);
   const [weightKg, setWeightKg] = useState(21000);
@@ -71,6 +73,10 @@ export default function App() {
     if (parsed.tonnage) setWeightKg(parsed.tonnage * 1000);
   }
 
+  if (view === "docs") {
+    return <DocsPage onBack={() => setView("calculator")} />;
+  }
+
   return (
     <div className="min-h-screen max-w-4xl mx-auto px-4 py-6 space-y-5">
       <header className="flex items-center justify-between flex-wrap gap-3">
@@ -83,6 +89,13 @@ export default function App() {
         </div>
         <div className="flex items-center gap-2">
           <LanguageSelect />
+          <button
+            onClick={() => setView("docs")}
+            className="neon-btn h-12"
+            title={t("docsNav")}
+          >
+            📄 {t("docsNav")}
+          </button>
           <button
             onClick={() => setSettingsOpen(true)}
             className="w-12 h-12 rounded-full flex items-center justify-center border border-white/10

@@ -88,19 +88,6 @@ class CalculateResponse(BaseModel):
     destinations: list[DestinationPrice]
 
 
-# ---------- Bank Transfer Talimati ----------
-
-class BankTransferRequest(BaseModel):
-    beneficiary_name: str
-    beneficiary_iban: str
-    beneficiary_bank: str
-    swift_code: str
-    amount: float
-    currency: str = "USD"
-    reference: str = ""
-    ordering_customer: str = ""
-
-
 # ---------- Vakifbank China Transfer (docx template based) ----------
 
 class VakifTransferRequest(BaseModel):
@@ -110,12 +97,3 @@ class VakifTransferRequest(BaseModel):
     amount: float
     currency: str = "USD"
     contract_no: str = ""
-
-
-# ---------- Dispatch ----------
-
-class DispatchRequest(BaseModel):
-    message: str
-    include_pdf: bool = False
-    include_excel: bool = False
-    calculate_payload: Optional[CalculateRequest] = None
