@@ -1,7 +1,8 @@
 import { useLanguage } from "../LanguageContext";
+import { formatMoney, productName } from "../utils/format";
 
 export default function PricingTable({ result }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   if (!result) {
     return (
@@ -15,7 +16,7 @@ export default function PricingTable({ result }) {
     <div className="glass-card overflow-hidden">
       <div className="p-4 border-b border-white/10 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <div className="text-lg font-semibold text-neon-cyan">{result.product.name}</div>
+          <div className="text-lg font-semibold text-neon-cyan">{productName(result.product, lang)}</div>
           <div className="text-xs text-slate-400">
             {t("chinaPriceInfo")}: ¥{result.price_cny_per_kg}/kg &middot; {t("rateInfo")}: 1 USD = {result.usd_cny_rate} CNY
             {result.fx_is_live ? ` (${t("liveRate")})` : ` (${t("fallbackRate")})`}
@@ -41,7 +42,7 @@ export default function PricingTable({ result }) {
                 <td className="px-4 py-3 text-slate-300">{d.destination}</td>
                 <td className="px-4 py-3 text-right">{result.weight_kg.toLocaleString()}</td>
                 <td className="px-4 py-3 text-right text-neon-cyan">{d.price_per_kg_usd.toFixed(2)}$</td>
-                <td className="px-4 py-3 text-right font-semibold">{d.total_usd.toLocaleString()}</td>
+                <td className="px-4 py-3 text-right font-semibold">{formatMoney(d.total_usd)}</td>
               </tr>
             ))}
           </tbody>

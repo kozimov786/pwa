@@ -6,20 +6,29 @@ import {
   createDestination,
   updateDestination,
   deleteDestination,
+  getProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
 } from "../api/client";
 import { useLanguage } from "../LanguageContext";
+
+const NAME_LANGS = ["en", "uz", "ru", "tr", "zh"];
 
 export default function SettingsModal({ open, onClose }) {
   const { t } = useLanguage();
   const [values, setValues] = useState(null);
   const [destinations, setDestinations] = useState([]);
   const [newDest, setNewDest] = useState({ name: "", freight_usd_total: "" });
+  const [products, setProducts] = useState([]);
+  const [newProductName, setNewProductName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
 
   const FIELDS = [
     { key: "cn_docs_cny", label: t("cnDocs") },
+    { key: "commission_cny_per_kg", label: t("commissionLabel") },
     { key: "cn_osh_freight_usd", label: t("cnOshFreight") },
     { key: "kg_transit_usd", label: t("kgTransit") },
     { key: "osh_tashkent_freight_usd", label: t("oshTashkentFreight") },
@@ -33,6 +42,7 @@ export default function SettingsModal({ open, onClose }) {
     setSaved(false);
     getExpenses().then(setValues).catch((err) => setError(err.message));
     getDestinations().then(setDestinations).catch((err) => setError(err.message));
+    getProducts().then(setProducts).catch((err) => setError(err.message));
   }, [open]);
 
   if (!open) return null;
@@ -87,6 +97,36 @@ export default function SettingsModal({ open, onClose }) {
       });
       setDestinations((prev) => [...prev, created]);
       setNewDest({ name: "", freight_usd_total: "" });
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function updateProductName(product, langCol, value) {
+    try {
+      const updated = await updateProduct(product.id, { ...product, [langCol]: value });
+      setProducts((prev) => prev.map((p) => (p.id === product.id ? updated : p)));
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function removeProduct(id) {
+    try {
+      await deleteProduct(id);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function addProduct() {
+    const name = newProductName.trim();
+    if (!name) return;
+    try {
+      const created = await createProduct(name);
+      setProducts((prev) => [...prev, created]);
+      setNewProductName("");
     } catch (err) {
       setError(err.message);
     }
@@ -164,6 +204,52 @@ export default function SettingsModal({ open, onClose }) {
           </div>
           <button onClick={addDest} className="neon-btn mt-2 w-full">
             {t("addDestination")}
+          </button>
+        </div>
+
+        <div className="pt-2 border-t border-white/10">
+          <h3 className="text-sm font-semibold text-neon-violet">{t("productsTitle")}</h3>
+          <p className="text-xs text-slate-400 mt-1 mb-3">{t("productsHint")}</p>
+
+          <div className="space-y-4">
+            {products.map((p) => (
+              <div key={p.id} className="border border-white/10 rounded-xl p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{p.name_en}</span>
+                  <button onClick={() => removeProduct(p.id)} className="text-red-400 text-xs hover:underline">
+                    {t("delete")}
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {NAME_LANGS.map((lc) => (
+                    <div key={lc}>
+                      <label className="text-[10px] uppercase text-slate-500">{lc}</label>
+                      <input
+                        type="text"
+                        defaultValue={p[`name_${lc}`] || ""}
+                        onBlur={(e) => updateProductName(p, `name_${lc}`, e.target.value)}
+                        className="w-full mt-0.5 bg-base-700/60 border border-white/10 rounded-lg px-2 py-1 text-xs
+                                   focus:outline-none focus:border-neon-cyan/60"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 mt-3">
+            <input
+              type="text"
+              value={newProductName}
+              onChange={(e) => setNewProductName(e.target.value)}
+              placeholder={t("newProductPlaceholder")}
+              className="flex-1 bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm
+                         focus:outline-none focus:border-neon-cyan/60"
+            />
+          </div>
+          <button onClick={addProduct} className="neon-btn mt-2 w-full">
+            {t("addButton")}
           </button>
         </div>
 

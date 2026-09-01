@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useLanguage } from "../LanguageContext";
+import { productName } from "../utils/format";
 
 export function ProductSelect({ products, selectedId, onSelect, onAddProduct }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -29,7 +30,7 @@ export function ProductSelect({ products, selectedId, onSelect, onAddProduct }) 
         {products.length === 0 && <option value="">{t("noProducts")}</option>}
         {products.map((p) => (
           <option key={p.id} value={p.id}>
-            {p.name}
+            {productName(p, lang)}
           </option>
         ))}
       </select>

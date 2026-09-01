@@ -19,15 +19,30 @@ export async function getProducts() {
   return res.json();
 }
 
-export async function createProduct(name) {
+export async function createProduct(nameEn) {
   const res = await handle(
     await fetch(`${BASE}/products`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name_en: nameEn }),
     })
   );
   return res.json();
+}
+
+export async function updateProduct(id, payload) {
+  const res = await handle(
+    await fetch(`${BASE}/products/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+  );
+  return res.json();
+}
+
+export async function deleteProduct(id) {
+  await handle(await fetch(`${BASE}/products/${id}`, { method: "DELETE" }));
 }
 
 export async function getExpenses() {

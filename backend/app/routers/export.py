@@ -14,12 +14,13 @@ router = APIRouter(prefix="/api/export", tags=["export"])
 @router.post("/pdf")
 async def export_pdf(payload: schemas.CalculateRequest, db: Session = Depends(get_db)):
     calc = await build_calculation(db, payload)
+    product_name = calc.product.name_for(payload.lang)
     pdf_bytes = generate_quotation_pdf(
-        calc.product.name, calc.weight_kg,
+        product_name, calc.weight_kg,
         [d.model_dump() for d in calc.destinations],
         lang=payload.lang,
     )
-    filename = f"quotation_{calc.product.name.replace(' ', '_')}.pdf"
+    filename = f"quotation_{product_name.replace(' ', '_')}.pdf"
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
@@ -30,12 +31,13 @@ async def export_pdf(payload: schemas.CalculateRequest, db: Session = Depends(ge
 @router.post("/excel")
 async def export_excel(payload: schemas.CalculateRequest, db: Session = Depends(get_db)):
     calc = await build_calculation(db, payload)
+    product_name = calc.product.name_for(payload.lang)
     xlsx_bytes = generate_quotation_excel(
-        calc.product.name, calc.weight_kg,
+        product_name, calc.weight_kg,
         [d.model_dump() for d in calc.destinations],
         lang=payload.lang,
     )
-    filename = f"quotation_{calc.product.name.replace(' ', '_')}.xlsx"
+    filename = f"quotation_{product_name.replace(' ', '_')}.xlsx"
     return Response(
         content=xlsx_bytes,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -61,7 +63,7 @@ async def _build_comparison_rows(db: Session, payload: schemas.ComparisonExportR
             raise HTTPException(status_code=400, detail=f"Unknown destination: {payload.destination}")
         rows.append(
             {
-                "product_name": calc.product.name,
+                "product_name": calc.product.name_for(payload.lang),
                 "weight_kg": calc.weight_kg,
                 "price_per_kg_usd": leg.price_per_kg_usd,
                 "total_usd": leg.total_usd,

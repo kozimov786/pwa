@@ -41,12 +41,16 @@ def calculate_landed_prices(
         return total_usd / weight_kg
 
     cn_docs = per_kg(expenses.cn_docs_cny / usd_cny_rate)
+    # Already a per-kg rate (paid to whoever prepares/organizes the
+    # shipment), not a shipment total — so it's not divided by weight_kg
+    # like the other legs.
+    commission = expenses.commission_cny_per_kg / usd_cny_rate
     cn_osh_freight = per_kg(expenses.cn_osh_freight_usd)
     kg_transit = per_kg(expenses.kg_transit_usd)
     osh_tashkent_freight = per_kg(expenses.osh_tashkent_freight_usd)
     uzb_transit = per_kg(expenses.uzb_transit_usd)
 
-    osh_price = base_usd_per_kg + cn_docs + cn_osh_freight + kg_transit
+    osh_price = base_usd_per_kg + cn_docs + commission + cn_osh_freight + kg_transit
     tashkent_price = osh_price + osh_tashkent_freight + uzb_transit
 
     legs = [

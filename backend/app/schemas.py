@@ -5,7 +5,11 @@ from pydantic import BaseModel, ConfigDict
 # ---------- Products ----------
 
 class ProductBase(BaseModel):
-    name: str
+    name_en: str
+    name_uz: Optional[str] = None
+    name_ru: Optional[str] = None
+    name_tr: Optional[str] = None
+    name_zh: Optional[str] = None
     oil_content: Optional[str] = None
     packaging: Optional[str] = None
     is_active: bool = True
@@ -19,11 +23,15 @@ class ProductOut(ProductBase):
     model_config = ConfigDict(from_attributes=True)
     id: int
 
+    def name_for(self, lang: str) -> str:
+        return getattr(self, f"name_{lang}", None) or self.name_en
+
 
 # ---------- Expenses ----------
 
 class ExpensesBase(BaseModel):
     cn_docs_cny: float = 0.0
+    commission_cny_per_kg: float = 0.5
     cn_osh_freight_usd: float = 0.0
     kg_transit_usd: float = 0.0
     osh_tashkent_freight_usd: float = 0.0

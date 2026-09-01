@@ -5,13 +5,20 @@ from .database import Base
 
 
 class Product(Base):
-    """Catalog of tradable products, e.g. 'Kabuklu 33', 'Xinpu 60%'.
-    Purchase price is entered fresh on every calculation, not stored here."""
+    """Catalog of tradable products, e.g. 'Yunnan 90%', 'Xinpu 60%'.
+    Purchase price is entered fresh on every calculation, not stored here.
+    Name is stored per-language so the UI and documents show the product
+    name in whichever language is selected; name_en is the canonical
+    fallback when a translation hasn't been filled in yet."""
 
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True, nullable=False)
+    name_en = Column(String, unique=True, index=True, nullable=False)
+    name_uz = Column(String, nullable=False)
+    name_ru = Column(String, nullable=False)
+    name_tr = Column(String, nullable=False)
+    name_zh = Column(String, nullable=False)
     oil_content = Column(String, nullable=True)  # e.g. "33%", "60%"
     packaging = Column(String, nullable=True)  # e.g. "50kg jute bags"
     is_active = Column(Boolean, default=True)
@@ -32,6 +39,7 @@ class ExpenseSettings(Base):
     id = Column(Integer, primary_key=True, default=1)
 
     cn_docs_cny = Column(Float, default=0.0)
+    commission_cny_per_kg = Column(Float, default=0.5)
     cn_osh_freight_usd = Column(Float, default=0.0)
     kg_transit_usd = Column(Float, default=0.0)
     osh_tashkent_freight_usd = Column(Float, default=0.0)

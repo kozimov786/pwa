@@ -98,7 +98,7 @@ def generate_quotation_pdf(product_name: str, weight_kg: float, legs: list[dict]
             leg["destination"],
             f"{weight_kg:,.0f}",
             f"{leg['price_per_kg_usd']:.2f}$",
-            f"{leg['total_usd']:,.2f}",
+            f"{leg['total_usd']:,.2f}$",
         ]
         for leg in legs
     ]
@@ -116,7 +116,7 @@ def generate_comparison_pdf(destination: str, rows: list[dict], lang: str = "en"
             row["product_name"],
             f"{row['weight_kg']:,.0f}",
             f"{row['price_per_kg_usd']:.2f}$",
-            f"{row['total_usd']:,.2f}",
+            f"{row['total_usd']:,.2f}$",
         ]
         for row in rows
     ]

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { calculate, exportComparisonExcel, exportComparisonPdf, getDestinations } from "../api/client";
 import { useLanguage } from "../LanguageContext";
+import { formatMoney, productName } from "../utils/format";
 
 const WEIGHT_PRESETS_KG = [20000, 21000, 22000, 20800];
 
@@ -86,7 +87,7 @@ export default function MultiProductPanel({ products, lang }) {
       const leg = res.destinations.find((d) => d.destination === destination);
       if (!leg) return null;
       const product = products.find((p) => p.id === r.productId);
-      return { id: r.id, name: product?.name ?? "", weightKg: res.weight_kg, ...leg };
+      return { id: r.id, name: productName(product, lang), weightKg: res.weight_kg, ...leg };
     })
     .filter(Boolean);
 
@@ -142,7 +143,7 @@ export default function MultiProductPanel({ products, lang }) {
                            focus:outline-none focus:border-neon-cyan/60"
               >
                 {products.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
+                  <option key={p.id} value={p.id}>{productName(p, lang)}</option>
                 ))}
               </select>
 
@@ -217,7 +218,7 @@ export default function MultiProductPanel({ products, lang }) {
                     <td className="px-4 py-3 font-medium">{r.name}</td>
                     <td className="px-4 py-3 text-right">{r.weightKg.toLocaleString()}</td>
                     <td className="px-4 py-3 text-right text-neon-cyan">{r.price_per_kg_usd.toFixed(2)}$</td>
-                    <td className="px-4 py-3 text-right font-semibold">{r.total_usd.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right font-semibold">{formatMoney(r.total_usd)}</td>
                   </tr>
                 ))}
               </tbody>

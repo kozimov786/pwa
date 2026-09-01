@@ -45,6 +45,8 @@ def _build_excel(meta: list[tuple[str, object]], headers: list[str], rows: list[
             cell.border = BORDER
             if col == 3:
                 cell.number_format = '0.00"$"'
+            if col == 4:
+                cell.number_format = '#,##0.00"$"'
             if i % 2 == 1:
                 cell.fill = ALT_FILL
 
