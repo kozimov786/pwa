@@ -7,11 +7,13 @@ import ActionBar from "./components/ActionBar";
 import SettingsModal from "./components/SettingsModal";
 import LanguageSelect from "./components/LanguageSelect";
 import DocsPage from "./components/DocsPage";
+import MultiProductPanel from "./components/MultiProductPanel";
 import { useLanguage } from "./LanguageContext";
 
 export default function App() {
   const { lang, t } = useLanguage();
   const [view, setView] = useState("calculator");
+  const [calcMode, setCalcMode] = useState("single");
   const [products, setProducts] = useState([]);
   const [productId, setProductId] = useState(null);
   const [weightKg, setWeightKg] = useState(21000);
@@ -108,56 +110,77 @@ export default function App() {
         </div>
       </header>
 
-      <section className="glass-card p-4 space-y-4">
-        <div>
-          <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">{t("product")}</div>
-          <ProductSelect
-            products={products}
-            selectedId={productId}
-            onSelect={setProductId}
-            onAddProduct={handleAddProduct}
-          />
-        </div>
+      <div className="flex gap-2">
+        <button
+          onClick={() => setCalcMode("single")}
+          className={`neon-btn ${calcMode === "single" ? "neon-btn-active" : ""}`}
+        >
+          {t("modeSingle")}
+        </button>
+        <button
+          onClick={() => setCalcMode("multi")}
+          className={`neon-btn ${calcMode === "multi" ? "neon-btn-active" : ""}`}
+        >
+          {t("modeMulti")}
+        </button>
+      </div>
 
-        <div>
-          <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">{t("weight")}</div>
-          <WeightPresets weightKg={weightKg} onChange={setWeightKg} />
-        </div>
+      {calcMode === "single" ? (
+        <>
+          <section className="glass-card p-4 space-y-4">
+            <div>
+              <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">{t("product")}</div>
+              <ProductSelect
+                products={products}
+                selectedId={productId}
+                onSelect={setProductId}
+                onAddProduct={handleAddProduct}
+              />
+            </div>
 
-        <div className="flex flex-wrap items-end gap-6">
-          <div>
-            <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">{t("chinaPriceLabel")}</div>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={priceCnyPerKg}
-              onChange={(e) => setPriceCnyPerKg(e.target.value)}
-              placeholder={t("chinaPricePlaceholder")}
-              className="w-40 bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm
-                         focus:outline-none focus:border-neon-cyan/60"
-            />
-          </div>
-          <div>
-            <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">{t("marginLabel")}</div>
-            <input
-              type="number"
-              step="0.01"
-              value={margin}
-              onChange={(e) => setMargin(parseFloat(e.target.value) || 0)}
-              className="w-28 bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm
-                         focus:outline-none focus:border-neon-cyan/60"
-            />
-          </div>
-        </div>
-      </section>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">{t("weight")}</div>
+              <WeightPresets weightKg={weightKg} onChange={setWeightKg} />
+            </div>
 
-      {error && <div className="glass-card p-4 text-red-400 text-sm">{error}</div>}
-      {loading && !result && <div className="glass-card p-8 text-center text-slate-400">{t("calculating")}</div>}
+            <div className="flex flex-wrap items-end gap-6">
+              <div>
+                <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">{t("chinaPriceLabel")}</div>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={priceCnyPerKg}
+                  onChange={(e) => setPriceCnyPerKg(e.target.value)}
+                  placeholder={t("chinaPricePlaceholder")}
+                  className="w-40 bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm
+                             focus:outline-none focus:border-neon-cyan/60"
+                />
+              </div>
+              <div>
+                <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">{t("marginLabel")}</div>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={margin}
+                  onChange={(e) => setMargin(parseFloat(e.target.value) || 0)}
+                  className="w-28 bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm
+                             focus:outline-none focus:border-neon-cyan/60"
+                />
+              </div>
+            </div>
+          </section>
 
-      <PricingTable result={result} />
+          {error && <div className="glass-card p-4 text-red-400 text-sm">{error}</div>}
+          {loading && !result && <div className="glass-card p-8 text-center text-slate-400">{t("calculating")}</div>}
 
-      <ActionBar calcPayload={calcPayload} canAct={!!result && !loading} />
+          <PricingTable result={result} />
+
+          <ActionBar calcPayload={calcPayload} canAct={!!result && !loading} />
+        </>
+      ) : (
+        <MultiProductPanel products={products} lang={lang} />
+      )}
 
       <SettingsModal
         open={settingsOpen}
