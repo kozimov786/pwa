@@ -115,6 +115,14 @@ export function exportExcel(payload, filename = "quotation.xlsx") {
   return downloadBlob("/export/excel", payload, filename);
 }
 
+export function exportComparisonPdf(payload, filename = "comparison.pdf") {
+  return downloadBlob("/export/comparison/pdf", payload, filename);
+}
+
+export function exportComparisonExcel(payload, filename = "comparison.xlsx") {
+  return downloadBlob("/export/comparison/excel", payload, filename);
+}
+
 export async function getVakifCompanies() {
   const res = await handle(await fetch(`${BASE}/vakif-transfer/companies`));
   return res.json();

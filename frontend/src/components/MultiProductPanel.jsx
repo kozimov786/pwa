@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { calculate, getDestinations } from "../api/client";
+import { calculate, exportComparisonExcel, exportComparisonPdf, getDestinations } from "../api/client";
 import { useLanguage } from "../LanguageContext";
 
 const WEIGHT_PRESETS_KG = [20000, 21000, 22000, 20800];
 
 function emptyRow(id, productId) {
-  return { id, productId: productId ?? null, weightKg: 21000, priceCnyPerKg: "" };
+  return { id, productId: productId ?? null, weightKg: 21000, priceCnyPerKg: "", marginUsdPerKg: 0 };
 }
 
 export default function MultiProductPanel({ products, lang }) {
@@ -16,6 +16,7 @@ export default function MultiProductPanel({ products, lang }) {
   const [results, setResults] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [exportBusy, setExportBusy] = useState(null);
 
   useEffect(() => {
     getDestinations()
@@ -63,7 +64,7 @@ export default function MultiProductPanel({ products, lang }) {
           product_id: r.productId,
           weight_kg: r.weightKg,
           price_cny_per_kg: parseFloat(r.priceCnyPerKg),
-          margin_usd_per_kg: 0,
+          margin_usd_per_kg: r.marginUsdPerKg || 0,
           lang,
         }).then((res) => ({ rowId: r.id, res }))
       )
@@ -88,6 +89,31 @@ export default function MultiProductPanel({ products, lang }) {
       return { id: r.id, name: product?.name ?? "", weightKg: res.weight_kg, ...leg };
     })
     .filter(Boolean);
+
+  function exportPayload() {
+    return {
+      destination,
+      rows: validRows.map((r) => ({
+        product_id: r.productId,
+        weight_kg: r.weightKg,
+        price_cny_per_kg: parseFloat(r.priceCnyPerKg),
+        margin_usd_per_kg: r.marginUsdPerKg || 0,
+      })),
+      lang,
+    };
+  }
+
+  async function runExport(key, fn) {
+    setExportBusy(key);
+    setError(null);
+    try {
+      await fn();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setExportBusy(null);
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -139,7 +165,19 @@ export default function MultiProductPanel({ products, lang }) {
                 value={row.priceCnyPerKg}
                 onChange={(e) => updateRow(row.id, { priceCnyPerKg: e.target.value })}
                 placeholder={t("chinaPricePlaceholder")}
+                title={t("chinaPriceLabel")}
                 className="w-32 bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm
+                           focus:outline-none focus:border-neon-cyan/60"
+              />
+
+              <input
+                type="number"
+                step="0.01"
+                value={row.marginUsdPerKg}
+                onChange={(e) => updateRow(row.id, { marginUsdPerKg: parseFloat(e.target.value) || 0 })}
+                placeholder={t("marginLabel")}
+                title={t("marginLabel")}
+                className="w-24 bg-base-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm
                            focus:outline-none focus:border-neon-cyan/60"
               />
 
@@ -185,6 +223,25 @@ export default function MultiProductPanel({ products, lang }) {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {!loading && tableRows.length > 0 && (
+        <div className="glass-card p-4 grid grid-cols-2 gap-3">
+          <button
+            disabled={!!exportBusy}
+            onClick={() => runExport("pdf", () => exportComparisonPdf(exportPayload()))}
+            className="action-btn"
+          >
+            📥 {exportBusy === "pdf" ? "…" : t("pdf")}
+          </button>
+          <button
+            disabled={!!exportBusy}
+            onClick={() => runExport("excel", () => exportComparisonExcel(exportPayload()))}
+            className="action-btn"
+          >
+            📊 {exportBusy === "excel" ? "…" : t("excel")}
+          </button>
         </div>
       )}
     </div>

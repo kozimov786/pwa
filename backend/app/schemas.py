@@ -88,6 +88,21 @@ class CalculateResponse(BaseModel):
     destinations: list[DestinationPrice]
 
 
+# ---------- Comparison export (multiple products -> one destination) ----------
+
+class ComparisonRow(BaseModel):
+    product_id: int
+    weight_kg: float = 21000.0
+    price_cny_per_kg: float
+    margin_usd_per_kg: float = 0.0
+
+
+class ComparisonExportRequest(BaseModel):
+    destination: str
+    rows: list[ComparisonRow]
+    lang: str = "en"
+
+
 # ---------- Vakifbank China Transfer (docx template based) ----------
 
 class VakifTransferRequest(BaseModel):
